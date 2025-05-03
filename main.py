@@ -2,6 +2,7 @@ import ctypes
 import sys, pygame
 import resources.classes as reference
 from resources.classes import button as button_obj
+from resources.classes import prompt as prompt_obj
 pygame.init()
 
 
@@ -141,6 +142,10 @@ while running:
     #this will change upon pressing a button on the screen
     if currentscene[0] != None:
         globals()[currentscene[0]]()
+        if reference.displayPrompt:
+            prompt = prompt_obj()
+            prompt.draw()
+            
     else:
         pass
     # --- game scene creation ---

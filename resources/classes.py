@@ -4,6 +4,9 @@ import pygame, sys
 pygame.init()
 currentscene = ["scene1"] #VERY IMPORTANT: first scene to be loaded
 entities : list = [] 
+displayPrompt = False
+
+
 #^^^stores the names of the objects in scene (text displays, buttons, timers, everything deemed important) alongside their ID (but only whenever you ACTUALLY draw them, otherwise they can't exist)
 # whenever a new scene is to be loadedthis list will be wiped and replace with the next scene's objects
 
@@ -164,10 +167,10 @@ class button:
 
 
 
-    def pressed(self, funcType=None, loadscene=None, elements=None, statement=None ): #intention of elements: we input ex: ("reset.funcType = 0")
+    def pressed(self, funcType=None, loadscene=None): #intention of elements: we input ex: ("reset.funcType = 0")
         #in here, we need to pass initially what we want the button to do (for the sake of time, for buttons, we're only adding scene)
         noArgs = True
-        args = [funcType, loadscene, elements, statement]
+        args = [funcType, loadscene]
         for arg in args:
             if arg is not None:
                 noArgs= False
@@ -204,7 +207,17 @@ class button:
                     self.toggled_state *= -1
                     self.draw(self.getPosition(), self.scale)
                 else:
-                    pass
+                    #if you have a button in the scene that is funcType = 1, during runtime, you will be prompted with a screen
+                    #that will ask you what elements you want to add, change, remove, etc
+                    #the reason why we do this is because we want to test text display, text input/output and checks during runtime
+
+                    #NOTE: hopefully by the time we're done, we would have used a seperate text files dedicated for every element if it shows up again
+                    #      if we do this, then everytime the game is ran again, then that button's function will be dependent on whatever that file tells it to do
+                    #      if not, the prompt will keep showing up, until you select a resource file, if you wish to change the resource file, then you need to change it with a command in runtime
+                    global displayPrompt
+                    displayPrompt = True
+
+
                     #If the button is not toggle, we are just gonna have it change something on screen
 
 
@@ -223,3 +236,52 @@ class button:
                 #change elements in the current screen, aka in the entities list
                 #once you've selected which button/element you want to change, you can change its properties for the same scene to be loaded but this time with the 
                 # new element properties inside
+
+
+
+class prompt(button): 
+    #DEVELOPER NOTE: have finished making the text box itself, intend to add breaks in the text if its too long, prob like 70% of the entire width
+    #                for the console itself, i'll add a fixed box that fills like 80% of the screen
+    #                would really like to add scrolling as well btw
+    #                
+    #                instead of centering the text later on, i'll add a checker to see if youre making a question or a command prompt, and if its a 
+    #                command prompt, the text will be anchored to the side starting from a fixed point, a percentage of the full width
+    #                
+    #                
+    #                
+
+    def __init__(self):
+        screen = pygame.display.get_surface()
+        width, height = screen.get_size()[0], screen.get_size()[1] 
+        self.name = "prompt"
+        self.fontSize = 15
+        self.font = pygame.font.SysFont("couriernew", self.fontSize)
+        self.text = "TESTTESTTEST TESTTESTTEST"
+        self.render = self.font.render(self.text, True, (255,255,255))
+        class Position:
+            x = width/2
+            y = height/2
+        
+        self.position = Position()
+        self.backgroundSize = [self.font.size(self.text)[0] + 10, height]
+        self.rectvalue = [self.getPosition()["box_x"],self.getPosition()["box_y"]] + self.backgroundSize
+
+    def getPosition(self):
+        x = self.position.x
+        y = self.position.y
+
+        t_x = x - self.font.size(self.text)[0] / 2
+        t_y = y - self.font.size(self.text)[1] / 2
+        b_x = x - (self.backgroundSize[0] / 2)
+        b_y = y - (self.backgroundSize[1] / 2)
+        return {
+            "box_x" : b_x,
+            "box_y" : b_y,
+            "text_x" : t_x,
+            "text_y" : t_y 
+        }
+
+    def draw(self):
+        screen = pygame.display.get_surface()
+        pygame.draw.rect(screen, (58, 59, 57), self.rectvalue)
+        screen.blit(self.render, [self.getPosition()["text_x"], self.getPosition()["text_y"]])
