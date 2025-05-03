@@ -2,10 +2,14 @@
  <br>
 what i did to unbreak this project during migration:<br>
 <br>
-START IN A NEW FOLDER <br>
-(folder powershell): python -m venv venv <br>
-(cmd): venv\Scripts\activate.ps1 (this bypasses the security features of ps1 >:) ) <br>
-(cmd): python -m install pygame <br>
-PASTE RESOURCES FOLDER AND MAIN.PY <br>
-<br>
-if the text after import are NOT white, it worked, press f5, choose to debug current active script, and viola <br>
+NEW SOLUTION THAT DOESNT REQUIRE A VENV:::
+<ol>
+ <li>Install the files as zip</li>
+ <li>Extract as a folder of any type</li>
+ <li>Open your VSC and select that folder</li>
+ <li>Make sure your python intepretor is your GLOBAL (3.13.3)</li>
+ <li>Open your cmd in VSC</li>
+ <li>type "pip install -r requirements.txt"</li>
+ <li>the "import" section should become NOT white</li>
+ <li>You're free to run it</li>
+</ol>
