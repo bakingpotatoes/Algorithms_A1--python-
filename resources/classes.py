@@ -1,6 +1,7 @@
 import ctypes
 from enum import Enum
 import pygame, sys
+import os
 pygame.init()
 currentscene = ["scene1"] #VERY IMPORTANT: first scene to be loaded
 entities : list = [] 
@@ -32,13 +33,15 @@ class button:
         print("<ID of {name}: {memory} & classname: {repr}".format(name=obj.name, memory=self.id, repr=self.__class__.__name__))
         if image != None:
             self.image : list = ["fodder"]
-            path : str = "C:/Users/User/Desktop/Algorithms and Web Programming/Algorithms/Assignment 1/images/{image}"
-            self.image.append(pygame.image.load(path.format(image = image))) #this part is kinda the same as ("blah %s" % [var])
+            workingDir = os.path.dirname(__file__)
+            path = os.path.join(str(workingDir), str(image))
+            alt_path = os.path.join(str(workingDir), str(alt_image))
+            self.image.append(pygame.image.load(path)) #this part is kinda the same as ("blah %s" % [var])
             if alt_image != None:
-                self.image.append(pygame.image.load(path.format(image = alt_image)))
+                self.image.append(pygame.image.load(alt_path))
             else:
                 if self.buttonType == "toggle":
-                    self.image.append(pygame.image.load(path.format(image = image)))
+                    self.image.append(pygame.image.load(path))
                 else:
                     pass
                 
