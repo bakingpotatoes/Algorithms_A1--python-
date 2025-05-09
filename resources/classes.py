@@ -13,8 +13,7 @@ displayPrompt = False
 
 
 
-time = 0 
-score = 0
+playerScore = 0
 # stored time and score here so no one can hack it via memory heap scanning >:)
 #stores the timer's value and the score to track
 
@@ -159,13 +158,13 @@ class button:
 
             else:
                 print("ERROR: no image detected in {}, proceeding to die".format(self.name))
-                crash() #crashes if you don't have an image, actually any image
+                crash() # type: ignore #crashes if you don't have an image, actually any image
 
             #!!NOTE:in case that the viewport isn't recognised in this script, we will call the actual function in the running script (not the transcompiled one here)
             #draw() intended to be called before every display.update() and after every fill()
             #intended to always have a position within viewport (relative to viewport)
         else:
-            crash() #unironic solution, OJWDNFOASFHOAISHDF HAHAHAHA (this happens when you fail the border checks, you get shot in the head lmao)
+            crash() # type: ignore #unironic solution, OJWDNFOASFHOAISHDF HAHAHAHA (this happens when you fail the border checks, you get shot in the head lmao)
 
 
 
@@ -206,7 +205,7 @@ class button:
 
             
             elif self.funcType == 1:
-                if self.buttonType == "toggle":
+                if self.buttonType == "toggle": #very specific, only redrawing the picture of the toggle button
                     self.toggled_state *= -1
                     self.draw(self.getPosition(), self.scale)
                 else:
@@ -221,7 +220,7 @@ class button:
                     displayPrompt = True
 
 
-                    #If the button is not toggle, we are just gonna have it change something on screen
+                    #If the button is not toggle, we are just gonna have it change something on screen instantly
 
 
 
@@ -242,7 +241,7 @@ class button:
 
 
 
-class prompt(button): 
+class prompt(): 
     #DEVELOPER NOTE: have finished making the text box itself, intend to add breaks in the text if its too long, prob like 70% of the entire width
     #                for the console itself, i'll add a fixed box that fills like 80% of the screen
     #                would really like to add scrolling as well btw
@@ -253,38 +252,160 @@ class prompt(button):
     #                
     #                
 
-    def __init__(self):
+    def __init__(self, text="", font="arial", font_size=15, autoExpandMode=1, boxSize_x=None, boxSize_y=None): #autoExpandMode=0 (manually change the size of box background), autoExpandMode = 1 (can leave the others blank)
+        # print("self.__name__ : %s" % [self.__class__.__name__])
         screen = pygame.display.get_surface()
         width, height = screen.get_size()[0], screen.get_size()[1] 
-        self.name = "prompt"
-        self.fontSize = 15
-        self.font = pygame.font.SysFont("couriernew", self.fontSize)
-        self.text = "TESTTESTTEST TESTTESTTEST"
-        self.render = self.font.render(self.text, True, (255,255,255))
+        self.fontSize = font_size
+        self.font_type = font
+        self.font = pygame.font.SysFont(self.font_type, self.fontSize) #ONLY UPDATES ONCE WHEN YOU INSTANTIATE IT WITH THE __INIT__ FUNCTION
+                                                                       #    FOR UPDATING, REUSE THE CHANGED INSTANCE ATTRIBUTES, AS CHANGING ONE DOESNT MEAN CHANGING THE OTHERS
+        self.text = text    #setting the string of text
         class Position:
-            x = width/2
-            y = height/2
+            x = width / 2
+            y = height / 2
         
         self.position = Position()
-        self.backgroundSize = [self.font.size(self.text)[0] + 10, height]
-        self.rectvalue = [self.getPosition()["box_x"],self.getPosition()["box_y"]] + self.backgroundSize
+        self.backgroundSize = [self.font.size(self.text)[0] + 10, self.font.size(self.text)[1] + 10] #we initialise the background box to have dimensions with extra border thickness
+        self.autoExpandMode = autoExpandMode
+        if self.autoExpandMode == 1:
+            self.backgroundSize = [self.font.size(self.text)[0] + 10, self.font.size(self.text)[1] + 10]
+        else:
+            args = [boxSize_x, boxSize_y]
+            for arg in args:
+                if arg is None:
+                    raise Exception(f"No arguments were found for boxSize_x && boxSize_y, for autoExpandMode was set to 1 || Warning from {self.__init__.__name__} in {self.__class__.__name__}")
+            self.backgroundSize = [boxSize_x, boxSize_y]
+
 
     def getPosition(self):
-        x = self.position.x
+        x = self.position.x #declaring x and y, based on the object's unique innerclass attributes (found in __init__)
         y = self.position.y
 
-        t_x = x - self.font.size(self.text)[0] / 2
-        t_y = y - self.font.size(self.text)[1] / 2
-        b_x = x - (self.backgroundSize[0] / 2)
-        b_y = y - (self.backgroundSize[1] / 2)
+        t_x = x - self.font.size(self.text)[0] / 2 #this is the width of the whole text, we are centering the text along the horizontal
+        t_y = y - self.font.size(self.text)[1] / 2 #this is the height of the whole text, in which we are cetnering the text along the vertical
+        b_x = x - self.backgroundSize[0] / 2    #this is the width of the background, which we've artifically expanded, we are centering it along the horizontal
+        b_y = y - self.backgroundSize[1] / 2    #this is the height of the background rect, centering it again
         return {
             "box_x" : b_x,
             "box_y" : b_y,
             "text_x" : t_x,
             "text_y" : t_y 
         }
+    
+    def setPosition(self, x = None, y = None):
+        Args = False #this checks if there were any arguments passed through, if yes, we update the Args boolean allow the self.position.x and y to update
+        args = [x, y]
+        for val in args:
+            if isinstance(val, (int, float)):
+                Args = True
+            else:
+                pass
+
+        if Args:
+            self.position.x = x
+            self.position.y = y
+
+        else:
+            print("ERROR: no args detected in class %s with class method %s" % [self.__class__.__name__, self.getPosition.__name__])
+
+
 
     def draw(self):
+        # print(f"{self.__class__.__name__}'s font size is {self.fontSize}")
+        self.rectvalue = [self.getPosition()["box_x"],self.getPosition()["box_y"]] + self.backgroundSize #appends the list to have [position.x, position.y, dimension.x, dimension.y]
         screen = pygame.display.get_surface()
-        pygame.draw.rect(screen, (58, 59, 57), self.rectvalue)
-        screen.blit(self.render, [self.getPosition()["text_x"], self.getPosition()["text_y"]])
+        pygame.draw.rect(screen, (58, 59, 57), self.rectvalue) #rect() syntax is as follows (target surface, color, (x_position, y_position, x_size, y_size) )
+        screen.blit(pygame.font.SysFont(self.font_type, self.fontSize).render(self.text, True, (255,255,255)), [self.getPosition()["text_x"], self.getPosition()["text_y"]]) #drawing our text
+
+
+class question(prompt): 
+    #A subclass of "prompt" class, we can call methods and innerclasses and attributes from its superclass
+    #Now the reason why we are subclassing it now is cuz its feasible, the superclass is 
+    def __init__(self, text="", font="arial", font_size=15, answer=None, points=None, autoExpandMode=1, boxSize_x=None, boxSize_y=None):
+        #turns out that subclass __init__() constructors are actually their own thing, unrelated to the super().__init__()
+        super().__init__(text, font, font_size, autoExpandMode, boxSize_x, boxSize_y)
+        #even the __class__.__name__ is the "cls", which will be known as the subclass
+        if len(text) == 0:
+            self.tempText = None
+        else:
+            self.tempText = text
+        self.answer = answer
+        self.points = points
+        self.check = True
+        for i in self.__class__.__dict__["__static_attributes__"]: #due to the high volume of questions, we need to check if the question might break the program, so we just don't display or use any questions that are blank, or have no points or answers
+            if self.__dict__[str(i)] is None or self.__dict__[str(i)] == None:
+                self.check = False
+
+class hint(prompt):
+    def __init__(self, text="", font="arial", font_size=15):
+        super().__init__(text, font, font_size)
+    
+    def getPosition(self):
+        x = self.position.x #declaring x and y, based on the object's unique innerclass attributes (found in __init__)
+        y = self.position.y
+
+        t_x = x + self.backgroundSize[0] / 2 #here we just replace the function, not centering it tbh, but we do need to center the t_x and t_y
+        t_y = y + self.backgroundSize[1] / 2
+        b_x = self.backgroundSize[0]
+        b_y = self.backgroundSize[1]
+        return {
+            "box_x" : b_x,
+            "box_y" : b_y,
+            "text_x" : t_x,
+            "text_y" : t_y 
+        }
+    
+class timer(prompt):
+    pass
+
+class score(prompt):
+    pass
+
+
+def clampf(val, min=None, max=None): #the purpose of this function is to check if "val" satisfies the min and max
+    if not isinstance(min, (int, float)): #if you didn't set a min value, in the same frame you called this function, it changes the min value to the current passed in value
+        min = val                         # to precis, it'll just do the same as (else: return val), leaving the val alone
+    if not isinstance(max, (int, float)): #same thing here with the max value
+        max = val
+
+    if val <= min:
+        return min
+    elif val >= max:
+        return max
+    else:
+        return val
+
+
+
+
+
+
+
+class t1():
+    def __init__(self, points):
+        self.points = points
+    def setname(self):
+        if __name__ == "__main__":
+            return f"this is: {self.__class__.__name__}"
+        
+    def printname(self):
+        print(self.setname())
+
+class t2(t1):
+    def __init__(self, points):
+        super().__init__(points)
+
+    def setname(self):
+        if __name__ == "__main__":
+            var1 = "override"
+            return var1
+        #self.points is calling the superclass' attribute, however, because the self.points is an attribute that is created in a __init__ function, it is 
+        #   linked to the object id that owns it, so technically, when you instantiate a t2 class object, in that instant, there simply can't be any interference
+        #   and you get away with the unique object id and the object attributes belonging to the subclass rather than the superclass' instance
+
+        #And if you're taking in a return value of a function from a superclass (called within the subclass), override it within the subclass, and within the superclass, get the return value of
+        #   the superclass' function, you get the overriden function's return value
+test = t2(points=200)
+original = t1(points=100)  
+test.printname()
