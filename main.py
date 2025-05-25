@@ -1,12 +1,12 @@
-import ctypes
-import sys, pygame
-import resources.classes as reference
-from resources.classes import button as button_obj
-from resources.classes import prompt as prompt_obj
-from resources.classes import question as question_obj
-from resources.classes import timer as timer_obj
-from resources.classes import score as score_obj
-from resources.classes import clampf as clampf
+import pygame #module
+import resources.classes as reference #local (for changing variables without allocating another slot in memory for another object of the same type in this file)
+from resources.classes import button as button_obj #local
+from resources.classes import prompt as prompt_obj #local
+from resources.classes import question as question_obj #local
+from resources.classes import timer as timer_obj #local
+from resources.classes import score as score_obj #local
+from resources.classes import clampf as clampf #local
+from resources.classes import textEdit as textEdit_obj #local
 
 import time
 pygame.init()
@@ -17,28 +17,35 @@ width : int = 800
 height : int = 600
 screenRes : tuple = [width, height]
 screen = pygame.display.set_mode(screenRes)
-screen.fill([255,255,255])
+screen.fill([0,0,0])
+openingText = prompt_obj("Look down at your terminal, its asking for your DESIRED TIME, you can't exit the program now until after this screen", font_size=18)
+openingText2 = prompt_obj("Please just bear with me here", font_size=19)
+openingText.setPosition(400,300)
+openingText2.setPosition(400,400)
+openingText.draw(backgroundColor=(0,0,0))
+openingText2.draw(backgroundColor=(0,0,0))
+pygame.display.update()
 
 TIME = 0
-def hi(string):
+def inputTime(string):
     
-    numbers = ["0","1","2","3","4","5","6","7","8","9",".","-"]
+    numbers = ["0","1","2","3","4","5","6","7","8","9","."]
     temp = [input(string), "float"]
     if len(temp[0]) == 0:
-        hi(string="Please input starting time: ")
+        inputTime(string="Please input starting time: ")
     else:
         for i in temp[0]:
             if i not in numbers:
                 temp[1] = "str"
         
         if temp[1] != "float":
-            hi(string="You suck, i said a starting TIME, that means numbers, you may include decimals: " )
+            inputTime(string="You must be testing me! I said TIME, and that means numbers, you may include decimals too: " )
         else:
-            if float(temp[0]) >= 10:
+            if float(temp[0]) >= 50:
                 global TIME
                 TIME = float(temp[0])
             else:
-                hi(string="Starting time must be MORE THAN 10 seconds lol: " )
+                inputTime(string="Starting time must be MORE THAN 100 seconds lol: " )
 
 
 MOUSESTATE : dict = {
@@ -76,6 +83,7 @@ A = button_obj(name="A", image="debug_button.png")
 B = button_obj(name="B", image="debug_button.png")
 C = button_obj(name="C", image="debug_button.png")
 D = button_obj(name="D", image="debug_button.png")
+textInput = textEdit_obj(autoExpandMode=0, boxSize_x=600, boxSize_y=300, font_size=20)
 
 A.setPosition(x=100, y=250)
 B.setPosition(x=100, y=320)
@@ -97,6 +105,8 @@ B.pressed(funcType=1)
 C.pressed(funcType=1)
 D.pressed(funcType=1)
 
+
+currentQuestionType = 0
 # -- create your scenes' layouts --
 def startscene():
     global STARTTIMER
@@ -116,19 +126,26 @@ def questionscene():
     #then you draw them
     reset.setPosition(x=730, y=550)
     if QUESTIONS[reference.Q_Num].type == 0:
+        #this part is for objective questions
+        globals()["currentQuestionType"] = 0
+
         debug.draw(debug.getPosition(), scale= 0.1)
         A.draw(A.getPosition(), scale=0.1)
         B.draw(B.getPosition(), scale=0.1)
         C.draw(C.getPosition(), scale=0.1)
         D.draw(D.getPosition(), scale=0.1)
-        if QUESTIONS[reference.Q_Num].check:
-            QUESTIONS[reference.Q_Num].draw()
-        else:
-            raise Exception("Question was not set up properly")
+
+        QUESTIONS[reference.Q_Num].draw()
+
     else:
-        pass #add the written answer strucure here
-        #when you type, it adds more text to the display
-        #whenever you type, it 
+        #this part is for subjective questions
+        globals()["currentQuestionType"] = 1
+        
+        debug.draw(debug.getPosition(), scale= 0.1)
+        QUESTIONS[reference.Q_Num].draw()
+        textInput.text = reference.dynamicText
+        textInput.setPosition(x=350, y=350)
+        textInput.draw(backgroundColor=[211,211,211], textcolor=[0,0,0])
 
     score.draw()
     timer.draw()
@@ -154,7 +171,7 @@ def endscene(): #we can use this scene as the results screen
     elif percentage > 0 and percentage <= 30:
         remark = ":'("
     else:
-        remark = "imagine a gun in fred's mouth"
+        remark = "now fred is homeless and broke (he didn't complete college)"
 
 
     reset.setPosition(x=400, y=300)
@@ -198,6 +215,7 @@ def check_mouse():
 #-- setting the opening scene -- 
 
 QUESTIONS = [
+    question_obj("Testbed Question for written Test", Qtype=1, font_size=20, answer="A"),
     question_obj("1) Which one is a name of a snake?", answer="A", points=1, font_size=20),
     question_obj("2) What is the fourth option in this question?", answer="A", points=1, font_size=20),
     question_obj("3) Evaluate the python expression: int(22/5)+23/4.", answer="C", points=1, font_size=20),
@@ -214,11 +232,12 @@ sum = 0
 for question in QUESTIONS:
     sum += question.points
 
-hi(string="Please input starting time: ")
+inputTime(string="Please input starting time: ")
 STARTTIMER = time.perf_counter() #when you reset the timer, make sure to reinstantiate this again, CURRENTTIME is reinstantiated every loop
 tripped : bool = False
 #-- game start loop --
 while running:
+    shift = pygame.key.get_pressed()[pygame.K_LSHIFT]
     CURRENTTIME = time.perf_counter() - STARTTIMER #increases in X.XX (2 decimal places)
     TIMELEFT = round(clampf(val=(TIME - CURRENTTIME), min=0.0), 1) #clamping it to 0 as minimum, maximum not set
     if (TIMELEFT == 0.00 or TIMELEFT < 0) and not tripped: #within the loop, it checks if the timeleft you have is up
@@ -282,6 +301,34 @@ while running:
                     MOUSE["SCROLLDOWN"] = True
                     pass
             pass
+        
+        elif event.type == pygame.KEYDOWN:
+            if currentQuestionType == 1:
+                inputKeyNames = [
+                    "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",
+                    "0","1","2","3","4","5","6","7","8","9",".","-", "space"
+                    ]
+
+                if pygame.key.name(event.key) in inputKeyNames:
+                    newtext = pygame.key.name(event.key)
+                    if textInput.checkLength():
+                        if pygame.key.name(event.key) == "space":
+                            reference.dynamicText += " "
+                        else:
+                            if shift:
+                                reference.dynamicText += newtext.upper()
+                            else:
+                                reference.dynamicText += newtext.lower()
+                    
+                elif pygame.key.name(event.key) == "backspace":
+                    reference.dynamicText = reference.dynamicText[:-1] #selects all characters in a string except for the last one
+
+                elif pygame.key.name(event.key) == "return":
+                    textInput.checkAnswer()
+
+            else:
+                pass    
+
 
         if event.type == pygame.QUIT:
             #print("Closing window \nQuitting Pygame")

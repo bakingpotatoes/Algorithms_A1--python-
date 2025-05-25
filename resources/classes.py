@@ -19,6 +19,8 @@ scoreID : int #Stores score id to change access class methods or instance attrib
 
 Q_Num = 0 #tells us which question we are on NOW
 playerScore = 0 #stores the player score
+dynamicText = ""
+
 
 class button:
     #start of button initialisation vars (our constants)
@@ -89,7 +91,6 @@ class button:
     def draw(self, pos = None, scale = None):
         #^^^ Basically, we call this function in the class shelf to ONLY draw shit
         #    we dont expect and will never expect it to return anything, unless its code to be ran in main.py for __main__ == __name__
-        print("drawing")
         if isinstance(scale, (int, float)):
             self.scale = scale
         elif not isinstance(scale, (int, float)):
@@ -111,7 +112,7 @@ class button:
             print("WARNING: no 'pos' argument detected, Failsafe activated, assuming getPosition()")
             if self.getPosition() == None:
                 #no pos, no getPosition, wtf are you trying to do?
-                print("you're an actual retard | FATAL ERROR TYPE: Object Error at {} [Attempted Process: draw(), self.getPosition() returned null]".format(self.name))
+                print("FATAL ERROR TYPE: Object Error at {} [Attempted Process: draw(), self.getPosition() returned null]".format(self.name))
             else:
                 #you have a getPosition, yay, we'll use that resource
                 happyGoLucky = True
@@ -233,8 +234,8 @@ class button:
                     notification = prompt(text="PRESS ANY KEY TO CONTINUE :)")
                     notification.setPosition(400,30)
                     notification.draw()
-                    ctypes.cast(timerID, ctypes.py_object).value.draw(color=[255,0,0])
-                    ctypes.cast(scoreID, ctypes.py_object).value.draw(color=[255,0,0])
+                    ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+                    ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[255,0,0])
 
 
                     obj = ctypes.cast(questionIDs[Q_Num], ctypes.py_object).value
@@ -336,16 +337,19 @@ class prompt():
 
         else:
             print("ERROR: no args detected in class %s with class method %s" % [self.__class__.__name__, self.getPosition.__name__])
+            crash()
 
 
 
-    def draw(self, pos_x=350, pos_y=100, color=[255,255,255]):
+    def draw(self, textcolor=[255,255,255], backgroundColor=[58, 59, 57]):
         screen = pygame.display.get_surface()
-        renderedFont = pygame.font.SysFont(self.font_type, self.fontSize).render(self.text, True, color)
+        renderedFont = pygame.font.SysFont(self.font_type, self.fontSize).render(self.text, True, textcolor)
         textPosition = [self.getPosition()["text_x"], self.getPosition()["text_y"]]
         if self.__class__.__name__ == "question":
             #the reason why we do this exclusively for "questions" is because IM TOO LAZY TO SET THE GODDAMN POSITION AND SIZING FOR EACH AND EVERY 10 OR MORE QUESTIONS
             #YOU TRY DOING IT ToT
+            pos_x = 350
+            pos_y = 100
             self.backgroundSize = [600,100]
             self.rectvalue = [pos_x - self.backgroundSize[0] / 2, pos_y - self.backgroundSize[1] / 2] + self.backgroundSize
             textPosition = [pos_x - self.font.size(self.text)[0] / 2, pos_y - self.font.size(self.text)[1] / 2]
@@ -353,14 +357,14 @@ class prompt():
         else:
             self.rectvalue = [self.getPosition()["box_x"],self.getPosition()["box_y"]] + self.backgroundSize #appends the list to have [position.x, position.y, dimension.x, dimension.y]
         
-        pygame.draw.rect(screen, (58, 59, 57), self.rectvalue) #rect() syntax is as follows (target surface, color, (x_position, y_position, x_size, y_size) )
+        pygame.draw.rect(screen, backgroundColor, self.rectvalue) #rect() syntax is as follows (target surface, color, (x_position, y_position, x_size, y_size) )
         screen.blit(renderedFont, textPosition) #drawing our text
 
 
 class question(prompt): 
     #A subclass of "prompt" class, we can call methods and innerclasses and attributes from its superclass
     #Now the reason why we are subclassing it now is cuz its feasible, the superclass is 
-    def __init__(self, text="", font="arial", font_size=15, answer=None, points=None, Qtype=0, autoExpandMode=1, boxSize_x=None, boxSize_y=None):
+    def __init__(self, text="", font="arial", font_size=15, answer=None, points=0, Qtype=0, autoExpandMode=1, boxSize_x=None, boxSize_y=None):
         #turns out that subclass __init__() constructors are actually their own thing, unrelated to the super().__init__()
         super().__init__(text, font, font_size, autoExpandMode, boxSize_x, boxSize_y)
         #even the __class__.__name__ is the "cls", which will be known as the subclass
@@ -372,10 +376,67 @@ class question(prompt):
         self.type = Qtype #0 means its an MCQ question, 1 means its a written one
         self.answer = answer
         self.points = points
-        self.check = True
-        for i in self.__class__.__dict__["__static_attributes__"]: #due to the high volume of questions, we need to check if the question might break the program, so we just don't display or use any questions that are blank, or have no points or answers
-            if self.__dict__[str(i)] is None or self.__dict__[str(i)] == None:
-                self.check = False
+        errorDict = {
+            "answer" : "Null answer(s)",
+            "points" : "Null points",
+            "tempText" : "Null placeholder or official text for this question",
+            "type" : "type of question is neither MCQ or Subjective (Null)",
+        }
+        for attr in iter(self.__class__.__dict__["__static_attributes__"]):
+            ###due to the high volume of questions, we need to check if the question might break the program, 
+            # so we just don't display or use any questions that are blank, or have no points or answers###
+            '''Deeper explanation: 
+                    "self" in this case is a subclass of "prompt" class, 
+                    self.__class__ accesses the in-built __class__ special attributes, treating this subclass as its own class for a while
+                    self.__class__.__dict__ accesses those __class__ special attributes
+                    self.__class__.__dict__["__static_attributes__"] accesses only the class-instance attributes that are set in this class alone
+
+                    self.__dict__ returns the same class-instance attributes, even the super() attributes
+
+                    class variables are accessed by classname.variableName, they are shared among all instances that belong to that class
+                    class-instance attributes are only accessed using .variablename outside the class, or variablename inside the class
+
+            '''
+            if attr in ("check"): #skips "check"
+                continue
+            if self.__dict__[attr] is not None: #checks if class-instance attributes are empty
+                match attr:
+                    case "answer":
+                        if len(self.__dict__[attr]) == 0:
+                            print("Error: Question says 'Nothing for question's answer'")
+                            crash() # type: ignore
+                        else:
+                            continue
+                    case "points":
+                        if self.__dict__[attr] < 0:
+                            print("Error: allocated Points cannot be negative")
+                            crash() # type: ignore
+                        elif self.__dict__[attr] == 0:
+                            print("Warning: points is zero")
+                        else:
+                            continue
+                    case "tempText":
+                        if len(self.__dict__[attr]) == 0 or self.__dict__[attr] is None:
+                            print("Error: Question says 'Nothing for question's text'")
+                            crash() # type: ignore
+                        else:
+                            continue
+
+                    case "type":
+                        if self.__dict__[attr] not in (0, 1):
+                            print("Error: No valid question type, but its not null")
+                            crash() # type: ignore
+                        else:
+                            continue                            
+            else:
+                print("Error: Question says %s " % [errorDict[attr]])
+                crash() # type: ignore
+
+        if self.type == 0:
+            pass
+        else:
+            pass
+                
 
 class hint(prompt):
     def __init__(self, text="", font="arial", font_size=15):
@@ -401,6 +462,56 @@ class timer(prompt): #i could use __init_subclass__ or something but nah
 
 class score(prompt):
     pass
+
+class textEdit(prompt):
+    def __init__(self, text="", font="arial", font_size=15, autoExpandMode=1, boxSize_x=None, boxSize_y=None):
+        super().__init__(text, font, font_size, autoExpandMode, boxSize_x, boxSize_y)
+        self.text = text
+
+    def checkAnswer(self):
+        #this section holds the algorithm
+        globals()["dynamicText"] = ""
+        notification = prompt(text="PRESS ANY KEY TO CONTINUE :)")
+        notification.setPosition(400,30)
+        notification.draw()
+        ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+        ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+        obj = ctypes.cast(questionIDs[Q_Num], ctypes.py_object).value
+
+        globals()["Q_Num"] += 1
+
+        query = [self.text, obj.answer]
+        print(query)
+        splicedSentence = [[],[]] #[self.text spliced],[obj.answer spliced]
+        word = ""
+        for i in query:
+            for char in i:
+                if char != " ":
+                    word += char
+                else:
+                    splicedSentence[query.index(i)].append(word)
+                    word = ""
+            splicedSentence[query.index(i)].append(word)
+            word = ""
+        
+            print(i)
+        
+
+        #insert word match percentage algorithm here
+
+        self.text = ""
+        for i in splicedSentence:
+            i.clear()
+        pygame.display.update()
+        asyncio.run(waiterFunc("anyKeyPressedEvent"))
+
+    def checkLength(self):
+        if len(dynamicText) <= 20:
+            return True
+        elif len(dynamicText) < 0:
+            return True
+        else: 
+            return False
 
 
 def clampf(val, min=None, max=None): #the purpose of this function is to check if "val" satisfies the min and max
@@ -435,37 +546,9 @@ async def waiterFunc(EventType=None): #this function will be called everytime yo
     if not isinstance(EventType, str): #checks if its still None
         pass
         if isinstance(EventType, (float, int)): #Not allowed to add ints or floats
-            crash()
+            crash() # type: ignore
     else:
         event = asyncio.Event()
         waitingFor = globals()[EventType](event)
 
         await waitingFor
-
-class t1():
-    def __init__(self, points):
-        self.points = points
-    def setname(self):
-        if __name__ == "__main__":
-            return f"this is: {self.__class__.__name__}"
-        
-    def printname(self):
-        print(self.setname())
-
-class t2(t1):
-    def __init__(self, points):
-        super().__init__(points)
-
-    def setname(self):
-        if __name__ == "__main__":
-            var1 = "override"
-            return var1
-        #self.points is calling the superclass' attribute, however, because the self.points is an attribute that is created in a __init__ function, it is 
-        #   linked to the object id that owns it, so technically, when you instantiate a t2 class object, in that instant, there simply can't be any interference
-        #   and you get away with the unique object id and the object attributes belonging to the subclass rather than the superclass' instance
-
-        #And if you're taking in a return value of a function from a superclass (called within the subclass), override it within the subclass, and within the superclass, get the return value of
-        #   the superclass' function, you get the overriden function's return value
-test = t2(points=200)
-original = t1(points=100)  
-test.printname()
