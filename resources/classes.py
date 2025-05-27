@@ -21,6 +21,7 @@ Q_Num = 0 #tells us which question we are on NOW
 playerScore = 0 #stores the player score
 dynamicText = ""
 
+# vvv Class consturctors for button class, containing several button types as well (change scene button, mcq button, toggle button, lightswitch button)
 
 class button:
     #start of button initialisation vars (our constants)
@@ -264,7 +265,7 @@ class button:
 
                     #If the button is not toggle, we are just gonna have it change something on screen instantly
 
-
+# vvv Class constructors for "default text prompt", "question prompt", "timer/score prompts", "dynamic text edit prompt"
 
 class prompt(): 
     #DEVELOPER NOTE: have finished making the text box itself, intend to add breaks in the text if its too long, prob like 70% of the entire width
@@ -438,25 +439,6 @@ class question(prompt):
             pass
                 
 
-class hint(prompt):
-    def __init__(self, text="", font="arial", font_size=15):
-        super().__init__(text, font, font_size)
-    
-    def getPosition(self):
-        x = self.position.x #declaring x and y, based on the object's unique innerclass attributes (found in __init__)
-        y = self.position.y
-
-        t_x = x + self.backgroundSize[0] / 2 #here we just replace the function, not centering it tbh, but we do need to center the t_x and t_y
-        t_y = y + self.backgroundSize[1] / 2
-        b_x = self.backgroundSize[0]
-        b_y = self.backgroundSize[1]
-        return {
-            "box_x" : b_x,
-            "box_y" : b_y,
-            "text_x" : t_x,
-            "text_y" : t_y 
-        }
-    
 class timer(prompt): #i could use __init_subclass__ or something but nah
     pass
 
@@ -513,6 +495,8 @@ class textEdit(prompt):
         else: 
             return False
 
+
+# vvv Auxillary functions (math functions, async functions, async setter functions)
 
 def clampf(val, min=None, max=None): #the purpose of this function is to check if "val" satisfies the min and max
     if not isinstance(min, (int, float)): #if you didn't set a min value, in the same frame you called this function, it changes the min value to the current passed in value
