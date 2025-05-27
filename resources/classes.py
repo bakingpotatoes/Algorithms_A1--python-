@@ -8,20 +8,22 @@ import time
 pygame.init()
 currentscene = ["startscene"] #VERY IMPORTANT: first scene to be loaded
 entities = [] #Loads all the buttons in the scene, so that the game can initialise each one's hitbox every update
-questionIDs = [] #In the respective order, stores question ids to get answer attribute for later
-
-timerID : int #Stores timer id to change access class methods or instance attributes later
-scoreID : int #Stores score id to change access class methods or instance attributes later
 
 #^^^stores the names of the objects in scene (text displays, buttons, timers, everything deemed important) alongside their ID (but only whenever you ACTUALLY draw them, otherwise they can't exist)
-# whenever a new scene is to be loadedthis list will be wiped and replace with the next scene's objects
+# whenever a new scene is to be loaded this list will be wiped and replace with the next scene's objects
+
+
+questionIDs = [] #In the respective order, stores question ids to get answer attribute for later
+timerID : int #Stores timer object runtime id to change access class methods or instance attributes later
+scoreID : int #Stores score object runtime id to change access class methods or instance attributes later
+
 
 
 Q_Num = 0 #tells us which question we are on NOW
-playerScore = 0 #stores the player score
-dynamicText = ""
+playerScore = 0 #accumulative player score, based on how many correct and wrong
+dynamicText = "" #stores concurrent text as a cache to update the text in textedit subclass object
 
-# vvv Class consturctors for button class, containing several button types as well (change scene button, mcq button, toggle button, lightswitch button)
+# vvv Class constructors for button class, containing several button types as well (change scene button, mcq button, toggle button, lightswitch button)
 
 class button:
     #start of button initialisation vars (our constants)
@@ -29,29 +31,30 @@ class button:
     #   we don't need to manually code it in, we can refer to it here,
     #   and change it on the spot here too with classmethods
     def __init__(self, name = None, image = None, alt_image=None, buttonType = None):
-        self.name = name #stores the name of the button
-        self.imageName = image #caches the name of the original image
-        self.alt_imageName = alt_image #caches the name of the alternate image
-        self.id = id(self) #sets the id isolated id allocation of this object
-        self.buttonType = buttonType #if not set to "toggle", we'll just ignore it and treat it as a normal button
-        self.h_boundingbox = [0,0] #important for box and cursor detection
-        self.v_boundingbox = [0,0]  #important for box and cursor detection
+        self.name = name #stores the identity of the button (A, B, C, D)
+        self.imageName = image #caches the name of the original image (ex: Image.png)
+        self.alt_imageName = alt_image #caches the name of the alternate image (same as imageName but for secondary toggle state / "tell the user if their answer is wrong or right")
+        self.id = id(self) #assigns object id of this "button" class-instance (to be accessed later to change attributes/properties or methods using ctypes.cast())
+        self.buttonType = buttonType #tells the game whether or not this button is a toggle-button or a normal-button
+        self.h_boundingbox = [0,0] #important for cursor detection over a button (horizontal component)
+        self.v_boundingbox = [0,0] #important for cursor detection over a button (vertical component)
 
 
-        if image != None:
+        if image != None: 
+        #NOTE ^^^ This checks if the button class was instantiated with an image (which it needs to be, at least imageName, alt_imageName is not required for normal buttons)
 
-            #This here checks if the programmer had given this button an image
-            #   if not, it'll raise exception to tell the programmer where the error was at least
-
-            self.image : list = ["fodder"] #we add this because the way we access image and alt_image is using listIndex[1 and -1], 1 gets the second item in the list, -1 gets the last
-            workingDir = os.path.dirname(__file__) #this gets the file's working directory
-            path = os.path.join(str(workingDir), str(image)) #this connects the working directory to the original image file
-            alt_path = os.path.join(str(workingDir), str(alt_image)) #this connects the working directory to the alternate image file
+            self.image : list = ["fodder"] #self.image stores all images, alt and normal of a button
+            #we add "fodder" because the way we access image and alt_image is using listIndex[1 and -1], 1 gets the second item in the list, -1 gets the last
+            
+            
+            workingDir = os.path.dirname(__file__) #this gets the image's working directory
+            path = os.path.join(str(workingDir), str(image)) #this connects the working directory to the original image filename (so that the system knows what to access, string formatting fails here)
+            alt_path = os.path.join(str(workingDir), str(alt_image)) #same as "path" but for alt_imageName
             self.image.append(pygame.image.load(path)) #we append the image's path to the instance attribute self.image
 
-            if alt_image != None:
+            if alt_image != None: #NOTE: note that alt image is not required for all buttons, only toggle types
                 #basically the point of this entire function here is if there is no alt_image (which is only needed for "toggle" buttons)
-                #, then we check if its a toggle, if it isn't we just ignore it, if it is, then we make the original image the alt image as well to avoid crashes
+                #, then we check if the button type is a "toggle", if it isn't we just ignore it, if it is, then we make the original image the alt image as well to avoid crashes
                 self.image.append(pygame.image.load(alt_path))
             else:
                 if self.buttonType == "toggle":
@@ -60,19 +63,23 @@ class button:
                     pass
         else:
             raise Exception(f"WARNING: No original image was given to {self.name}")
+            crash() #crashes for debugging
                 
         self.toggled_state = -1 #toggled_states:
                            # -1 = toggled off
                            #  1 = toggled on
 
     def setPosition(self, x = None, y = None):
-        #I use this function to set the position of the object everytime
+        #Everytime before you draw an button onto the screen, you need to set its position
         self.cacheposition = self.Position(self.name) #unique reference to memory, a calling card to make sure the outerclass understands which object to call...
-        self.cacheposition.x = x #we change the values inside this mf
+        
+        #we change the x and y values in the Position innerclass
+        self.cacheposition.x = x
         self.cacheposition.y = y
-        # print("{a}'s position: {b}".format(a=self.name, b=self.getPosition()))
 
     def getPosition(self):
+        #For buttons in particular, called 
+
         v2 = [self.cacheposition.x, self.cacheposition.y]
         for v in v2: #checks if this object even has any values changed in self.Position
             if v == None: 
@@ -338,7 +345,7 @@ class prompt():
 
         else:
             print("ERROR: no args detected in class %s with class method %s" % [self.__class__.__name__, self.getPosition.__name__])
-            crash()
+            crash() # type: ignore
 
 
 
@@ -361,7 +368,7 @@ class prompt():
         pygame.draw.rect(screen, backgroundColor, self.rectvalue) #rect() syntax is as follows (target surface, color, (x_position, y_position, x_size, y_size) )
         screen.blit(renderedFont, textPosition) #drawing our text
 
-
+# vvv Subclass of prompt to inherit from "prompt" class
 class question(prompt): 
     #A subclass of "prompt" class, we can call methods and innerclasses and attributes from its superclass
     #Now the reason why we are subclassing it now is cuz its feasible, the superclass is 

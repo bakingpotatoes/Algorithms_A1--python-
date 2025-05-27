@@ -26,7 +26,7 @@ openingText.draw(backgroundColor=(0,0,0))
 openingText2.draw(backgroundColor=(0,0,0))
 pygame.display.update()
 
-TIME = 0
+TIME = 0 #TIME set to another value when you input your "desired time"
 def inputTime(string):
     
     numbers = ["0","1","2","3","4","5","6","7","8","9","."]
@@ -237,27 +237,32 @@ STARTTIMER = time.perf_counter() #when you reset the timer, make sure to reinsta
 tripped : bool = False
 #-- game start loop --
 while running:
-    shift = pygame.key.get_pressed()[pygame.K_LSHIFT]
-    CURRENTTIME = time.perf_counter() - STARTTIMER #increases in X.XX (2 decimal places)
+    currentscene = reference.currentscene
+    shift = pygame.key.get_pressed()[pygame.K_LSHIFT] #detects when you hold shift key
+    CURRENTTIME = time.perf_counter() - STARTTIMER #increases in X.XX (2 decimal places), starts close to 0
     TIMELEFT = round(clampf(val=(TIME - CURRENTTIME), min=0.0), 1) #clamping it to 0 as minimum, maximum not set
+    
+
     if (TIMELEFT == 0.00 or TIMELEFT < 0) and not tripped: #within the loop, it checks if the timeleft you have is up
         #LEVER TRIPPING CONDITION (REQUIRES PRIMARY CONDITION TO BE TRIPPED AND CHECKS IF ALREADY TRIPPED)
+        #When your TIMELEFT is up, it removes all entities you can interact with and forces you to the endscene
         tripped = True
         currentscene.clear()
         currentscene.append("endscene")
         reference.entities.clear()
-    elif TIMELEFT > 0 and tripped: #untrips the one time call if ("endscene" not in currentscene) condition is met (In this case, this is called assuming that you've restarted the timer)
+    elif TIMELEFT > 0 and tripped:
         #LEVER SELF UNTRIPPING (PRIMARY CONDITION OPPOSITE MUST BE MET AND MUST BE ALREADY TRIPPED)
-        #   if we don't add the reverse of the primary condition, we will only trip and untrip for every loop... not ideal when you dont want a rapid fire of TRUE and FALSE
+        #untrips itself once the user chooses to "Reset", which will reset the timer and start back at the start
+        #^^^ this lever tripping function allows the game to force the endscene when TIMELEFT is up only ONCE, 
+        # allows the user to click other buttons in the scene and load other scenes when TIMELEFT is up but equals to or is below zero
         tripped = False
-        #this function just makes it so that we can call this lever function multiple times in the same loop without anything additional
 
-    if (reference.Q_Num + 1) > len(QUESTIONS):
+
+    if (reference.Q_Num + 1) > len(QUESTIONS): #Checks if youre at the end of the questions or not, clears the scene, loads endscene and clear all previous entities on screen
         currentscene.clear()
         currentscene.append("endscene")
         reference.entities.clear()
 
-    currentscene = reference.currentscene
     screen.fill(colour.get("red"))
     timer = timer_obj(f"Your Remaining Time: {TIMELEFT} seconds", autoExpandMode=0, boxSize_x=250,boxSize_y=30)
     score = score_obj(f"Your Current Score: {reference.playerScore} / {sum}")
@@ -276,9 +281,10 @@ while running:
 
 
     
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            match event.dict["button"]:
+    for event in pygame.event.get(): #checks if any mouse or keyboard events are executed
+        if event.type == pygame.MOUSEBUTTONDOWN: #checks if the event is a mouse click/scroll/moved cursor
+            match event.dict["button"]: #checks through built-in pygame list of mouse event types (1 is LMB, 2 is MMB, 3 is RMB, 4 is scrollWheelUp, 5 is scrollWheelDown)
+                # match-case is like if event.dict["button"] == 1, goto case 1 function
                 case 1:
                     #left mouse button down
                     MOUSE["LEFTBUTTON"] = True
@@ -287,18 +293,22 @@ while running:
                 case 2:
                     #scroll wheel button down
                     MOUSE["MIDDLEMOUSE_BUTTON"] = True
+                    print("Input detected: scroll wheel button down")
                     pass
                 case 3:
                     #right mouse button down
                     MOUSE["RIGHTBUTTON"] = True
+                    print("Input detected: Right Mouse Button")
                     pass
                 case 4:
                     #scroll wheel up
                     MOUSE["SCROLLUP"] = True
+                    print("Input detected: Scrolling up")
                     pass
                 case 5:
                     #scroll wheel down
                     MOUSE["SCROLLDOWN"] = True
+                    print("Input detected: Scrolling down")
                     pass
             pass
         
