@@ -22,6 +22,7 @@ scoreID : int #Stores score object runtime id to change access class methods or 
 Q_Num = 0 #tells us which question we are on NOW
 playerScore = 0 #accumulative player score, based on how many correct and wrong
 dynamicText = "" #stores concurrent text as a cache to update the text in textedit subclass object
+windowClosed = False
 
 # vvv Class constructors for button class, containing several button types as well (change scene button, mcq button, toggle button, lightswitch button)
 
@@ -529,7 +530,9 @@ async def anyKeyPressedEvent(event): #if any key is pressed, "event" will .set()
                 a = False
             elif e.type == pygame.QUIT:
                 a = False
-                pygame.quit()
+                globals()["windowClosed"] = True
+                pygame.quit() #exits the pygame
+                sys.exit() #exits the python program
     event.set()
     await event.wait()
 
