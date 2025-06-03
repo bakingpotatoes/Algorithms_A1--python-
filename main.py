@@ -7,7 +7,7 @@ from resources.classes import timer as timer_obj #local
 from resources.classes import score as score_obj #local
 from resources.classes import clampf as clampf #local
 from resources.classes import textEdit as textEdit_obj #local
-
+import os, sys
 import time
 pygame.init()
 
@@ -357,4 +357,5 @@ while running:
     MOUSE["SCROLLUP"] = False
     pygame.display.update()
 pygame.quit()
+sys.exit()
     #literally refreshes the screen
