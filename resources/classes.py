@@ -480,6 +480,24 @@ class textEdit(prompt):
 
         globals()["Q_Num"] += 1
         def GODOFCHECKINGEYEOFRA():
+
+            '''
+            Basically this function checks if you've entered a string or a float
+
+            100 is a float
+            100.1 is a float
+            -100.1 is a float
+            -.543 is a float
+                ABOUT FLOATS: if the float has a bad syntax, like -.-1 or 2.3.4, it will remain a string
+            
+                
+            if your answer is a float and the answer is bad syntax, and the correct answer is a float, it will tell you where the problem lies
+            ... and the answer too :)
+
+            the only limitation here is that if  you enter a technical float like 500.5.1, you won't get the "bad number syntax" penalty
+            
+            '''
+
             ctypes.cast(scoreID, ctypes.py_object).value.text = f"Your Current Score: Added {obj.points}"
             ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[255,0,0])
             ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
@@ -488,8 +506,9 @@ class textEdit(prompt):
             letters = string.ascii_lowercase + " "
             sts = ""
             add = ""
+            addAns = ""
             achievedScore = 0
-            query = [userAnswer, questionAnswer]
+            query = [questionAnswer, userAnswer]
             splicedSentence = [[],[]] #[userAnswer spliced],[questionAnswer spliced]
 
             for i in query:
@@ -503,52 +522,108 @@ class textEdit(prompt):
                 if assign == "str" or len(i) == 0: #if there's nothing in the input, the For loop just doesn't execute
                     query[indexVal] = str(i)
                 else:
+                    #at this point, its a float
                     #trying my best to not nest so deep as it becomes unreadable
-                    if "-" in i and "." in i: #checks if your float formatting for "-" and "." is incorrect
+                    if indexVal == 1:
+                        if "-" in i and "." in i: #checks if your float formatting for "-" and "." is incorrect
+                            print("test", i)
 
-                        if (i.index("-") > i.index(".")):
-                            #kill
-                            add = "(bad float) negatives cannot be behind decimals"
-                            sts = "Wrong"
+                            if (i.index("-") > i.index(".")):
+                                #kill
+                                add = "(bad float) negatives cannot be behind decimals"
+                                sts = "Wrong"
+                                achievedScore = -2
+                                addAns = f"Correct answer is {obj.answer}"
+                                return (sts, add, addAns, achievedScore)
 
-                        elif i.index("-") > 0:
-                            add = "(bad float) negative sign not infront of number"
-                            sts = "Wrong"
+                            elif i.index("-") > 0:
+                                #kill
+                                add = "(bad float) negative sign not infront of number"
+                                sts = "Wrong"
+                                achievedScore = -2
+                                addAns = f"Correct answer is {obj.answer}"
+                                return (sts, add, addAns, achievedScore)
 
-                        elif i.count(".") > 1:
-                            add = "(bad float) too many decimals"
-                            sts = "Wrong"
+                            elif i.count(".") > 1:
+                                #kill
+                                add = "(bad float) too many decimals"
+                                sts = "Wrong"
+                                achievedScore = -2
+                                addAns = f"Correct answer is {obj.answer}"
+                                return (sts, add, addAns, achievedScore)
 
-                        elif i.count("-") > 1:
-                            add = "(bad float) too many negatives"
-                            sts = "Wrong"
+
+                            elif i.count("-") > 1:
+                                #kill
+                                add = "(bad float) too many negatives"
+                                sts = "Wrong"
+                                achievedScore = -2
+                                addAns = f"Correct answer is {obj.answer}"
+                                return (sts, add, addAns, achievedScore)
+
+
+                            else:
+                                query[indexVal] = float(i)
+                        elif "-" in i:
+                            if i.index("-") > 0:
+                                #kill
+                                add = "(bad float) negative in the wrong place"
+                                sts = "Wrong"
+                                achievedScore = -2
+                                addAns = f"Correct answer is {obj.answer}"
+                                return (sts, add, addAns, achievedScore)
+
+
+                            elif i.count("-") > 0:
+                                #kill
+                                add = "(bad float) too many negatives"
+                                sts = "Wrong"
+                                achievedScore = -2
+                                addAns = f"Correct answer is {obj.answer}"
+                                return (sts, add, addAns, achievedScore)
+
+
+                            else:
+                                query[indexVal] = float(i)
+
+                        elif "." in i:
+                            if i.count(".") > 1:
+                                #kill
+                                add = "(bad float) too many decimals"
+                                sts = "Wrong"
+                                achievedScore = -2
+                                addAns = f"Correct answer is {obj.answer}"
+                                return (sts, add, addAns, achievedScore)
+
+                            else:
+                                query[indexVal] = float(i)
 
                         else:
+                            #treat as normal float
                             query[indexVal] = float(i)
-                    elif "-" in i:
-                        if i.index("-") > 0:
-                            #kill
-                            add = "(bad float) negative in the wrong place"
-                            sts = "Wrong"
-
-                        elif i.count("-") > 0:
-                            add = "(bad float) too many negatives"
-                            sts = "Wrong"
-
+                    
+                    
+                    # here for the question here, above for the useranswer
+                    
+                    elif indexVal == 0:
+                        if "-" in i and "." in i:
+                            if (i.index("-") > i.index(".")) or i.index("-") > 0 or i.count(".") > 1 or i.count("-") > 1:
+                                pass
+                            else:
+                                query[indexVal] = float(i)
+                        elif "-" in i:
+                            if i.index("-") > 0 or i.count("-") > 0:
+                                pass
+                            else:
+                                query[indexVal] = float(i)
+                        elif "." in i:
+                            if i.count(".") > 1:
+                                pass
+                            else:
+                                query[indexVal] = float(i)
                         else:
+                            #treat as normal float
                             query[indexVal] = float(i)
-
-                    elif "." in i:
-                        if i.count(".") > 1:
-                            #kill
-                            add = "(bad float) too many decimals"
-                            sts = "Wrong"
-                        else:
-                            query[indexVal] = float(i)
-
-                    else:
-                        #treat as normal float
-                        query[indexVal] = float(i)
 
 
                 print(i, type(query[indexVal]))
@@ -559,17 +634,17 @@ class textEdit(prompt):
                 word = "" #need to store this here because it is accumulative (wish there was another way instead of clogging outside the code)
                 for i in query:
                     for char in i:
-                        print(f"char: '{char}'")
+                        # print(f"char: '{char}'")
 
                         if char not in (" ", "-"):
-                            print(char != " ")
+                            # print(char != " ")
                             word += char.lower() #adds the word if there is a space
                         elif len(word) > 0 and char in (" ", "-"): #adds the word if there is a space, doesn't add empty strings
-                            print("pass")
+                            # print("pass")
                             splicedSentence[query.index(i)].append(word)
                             word = ""
 
-                        print(f"word count: '{len(word)}'")
+                        # print(f"word count: '{len(word)}'")
                     if len(word) > 0: #adds the word if its the last word of the user's answer or the question class instance's answer, doesn't add empty strings
                         splicedSentence[query.index(i)].append(word)
                         word = ""
@@ -592,6 +667,7 @@ class textEdit(prompt):
                     achievedScore = obj.points
 
                 else:
+                    #kill
                     sts = "Wrong"
                     add = f"Correct answer is {obj.answer}" 
 
@@ -605,18 +681,21 @@ class textEdit(prompt):
                     achievedScore = obj.points
 
                 else:
+                    #kill
                     sts = "Wrong"
                     add = f"Correct answer is {obj.answer}"
                 
             elif type(query[0]) != type(query[1]):
-                print("you tried to enter a %s into a question that required a %s" % (type(query[0]), type(query[1])))
+                #kill
+                sts = "Wrong"
+                add = f"Your answer is {type(query[0])}, but the actual answer is {type(query[1])}" 
 
-            return (sts, add, achievedScore)
+            return (sts, add, addAns, achievedScore)
         
 
 
         
-        (s, a, addedScore)= GODOFCHECKINGEYEOFRA()
+        (s, a, addAns, addedScore)= GODOFCHECKINGEYEOFRA()
         ctypes.cast(scoreID, ctypes.py_object).value.text = f"Your Score: Added {addedScore}"
         if addedScore > 0:
             ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[51,255,51])
@@ -625,8 +704,15 @@ class textEdit(prompt):
         ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
         result = f"Your answer is {s}, {a}"
         correctAns = prompt(text=result, font_size=20)
-        correctAns.setPosition(350, 500)
+        correctAns2 = prompt(text=addAns, font_size=20, autoExpandMode=0, boxSize_x=300, boxSize_y=30)
+        correctAns.setPosition(350, 470)
+        correctAns2.setPosition(350, 500)
         correctAns.draw()
+        if addAns != "":
+            correctAns2.draw()
+        else:
+            pass
+
         self.text = "" #clears the text inside the textbox
         pygame.display.update()
         asyncio.run(waiterFunc("anyKeyPressedEvent"))
@@ -642,7 +728,7 @@ class textEdit(prompt):
 
 # vvv Auxillary functions (math functions, async functions, async setter functions)
 
-def clampf(val, min=None, max=None): #the purpose of this function is to check if "val" satisfies the min and max
+def clampf(val, min=None, max=None): #the purpose of this function is to check if "val" satisfies the min and maxc
     if not isinstance(min, (int, float)): #if you didn't set a min value, in the same frame you called this function, it changes the min value to the current passed in value
         min = val                         # to precis, it'll just do the same as (else: return val), leaving the val alone
     if not isinstance(max, (int, float)): #same thing here with the max value
