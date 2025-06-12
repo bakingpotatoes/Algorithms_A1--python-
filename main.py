@@ -84,11 +84,14 @@ B = button_obj(name="B", image="debug_button.png")
 C = button_obj(name="C", image="debug_button.png")
 D = button_obj(name="D", image="debug_button.png")
 textInput = textEdit_obj(autoExpandMode=0, boxSize_x=600, boxSize_y=300, font_size=20)
+textInputGuidance1 = prompt_obj(text="For string questions, write the exact string, spaces and hyphens don't matter", autoExpandMode=0, boxSize_x=600, boxSize_y=50, font_size=20)
+textInputGuidance2 = prompt_obj(text="For number questions, don't include spaces, negatives before decimals, -.005 is -0.005, don't be silly", autoExpandMode=0, boxSize_x=600, boxSize_y=50, font_size=16)
 
 A.setPosition(x=100, y=250)
 B.setPosition(x=100, y=320)
 C.setPosition(x=100, y=390)
 D.setPosition(x=100, y=460)
+
 
 reset.setPosition(x=730, y=550)
 debug.setPosition(x=730, y=50)
@@ -145,7 +148,11 @@ def questionscene():
         QUESTIONS[reference.Q_Num].draw()
         textInput.text = reference.dynamicText
         textInput.setPosition(x=350, y=350)
+        textInputGuidance1.setPosition(x=350, y=200)
+        textInputGuidance2.setPosition(x=350, y=250)
         textInput.draw(backgroundColor=[211,211,211], textcolor=[0,0,0])
+        textInputGuidance1.draw(backgroundColor=[255, 255, 0], textcolor=[0,0,0])
+        textInputGuidance2.draw(backgroundColor=[255, 255, 0], textcolor=[0,0,0])
 
     score.draw()
     timer.draw()
@@ -215,7 +222,6 @@ def check_mouse():
 #-- setting the opening scene -- 
 
 QUESTIONS = [
-    question_obj("Testbed Question for written Test 1", Qtype=1, font_size=20, answer="-.1", points=5),
     question_obj("Testbed Question for written Test 2   ", Qtype=1, font_size=20, answer="A", points=4),
     question_obj("Testbed Question for written Test 1", Qtype=1, font_size=20, answer="A", points=3),
     question_obj("Testbed Question for written Test 2   ", Qtype=1, font_size=20, answer="A"),

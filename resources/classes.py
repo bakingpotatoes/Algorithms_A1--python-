@@ -476,10 +476,8 @@ class textEdit(prompt):
             userAnswer = self.text #caching to leave the original data unaffected
             questionAnswer = obj.answer #caching to leave the original data unaffected
             letters = string.ascii_lowercase + " "
-            result = ["",""]
-            sts = result[0]
-            add = result[1]
-            word = ""
+            sts = ""
+            add = ""
             query = [userAnswer, questionAnswer]
             splicedSentence = [[],[]] #[userAnswer spliced],[questionAnswer spliced]
 
@@ -499,32 +497,32 @@ class textEdit(prompt):
 
                         if (i.index("-") > i.index(".")):
                             #kill
-                            globals()["add"] = "blah blah blah"
-                            globals()["sts"] = "Wrong"
+                            add = "(bad float) negatives cannot be behind decimals"
+                            sts = "Wrong"
 
                         elif i.index("-") > 0:
-                            globals()["add"] = "blah blah blah"
-                            globals()["sts"] = "Wrong"
+                            add = "(bad float) negative sign not infront of number"
+                            sts = "Wrong"
 
                         elif i.count(".") > 1:
-                            globals()["add"] = "blah blah blah"
-                            globals()["sts"] = "Wrong"
+                            add = "(bad float) too many decimals"
+                            sts = "Wrong"
 
                         elif i.count("-") > 1:
-                            globals()["add"] = "blah blah blah"
-                            globals()["sts"] = "Wrong"
+                            add = "(bad float) too many negatives"
+                            sts = "Wrong"
 
                         else:
                             query[indexVal] = float(i)
                     elif "-" in i:
                         if i.index("-") > 0:
                             #kill
-                            globals()["add"] = "negative in the wrong place"
-                            globals()["sts"] = "Wrong"
+                            add = "(bad float) negative in the wrong place"
+                            sts = "Wrong"
 
                         elif i.count("-") > 0:
-                            globals()["add"] = "too many negatives"
-                            globals()["sts"] = "Wrong"
+                            add = "(bad float) too many negatives"
+                            sts = "Wrong"
 
                         else:
                             query[indexVal] = float(i)
@@ -532,8 +530,8 @@ class textEdit(prompt):
                     elif "." in i:
                         if i.count(".") > 1:
                             #kill
-                            globals()["add"] = "too many decimals"
-                            globals()["sts"] = "Wrong"
+                            add = "(bad float) too many decimals"
+                            sts = "Wrong"
                         else:
                             query[indexVal] = float(i)
 
@@ -547,44 +545,71 @@ class textEdit(prompt):
 
             #check if both answers are the same type
             if type(query[0]) == type(query[1]) and type(query[0]) is str: #check if they're strings
+                word = "" #need to store this here because it is accumulative (wish there was another way instead of clogging outside the code)
                 for i in query:
                     for char in i:
-                        if char != " " or char != "-":
-                            word += char #adds the word if there is a space
-                        elif len(word) > 0 and char == " ": #adds the word if there is a space, doesn't add empty strings
+                        print(f"char: '{char}'")
+
+                        if char not in (" ", "-"):
+                            print(char != " ")
+                            word += char.lower() #adds the word if there is a space
+                        elif len(word) > 0 and char in (" ", "-"): #adds the word if there is a space, doesn't add empty strings
+                            print("pass")
                             splicedSentence[query.index(i)].append(word)
                             word = ""
+
+                        print(f"word count: '{len(word)}'")
                     if len(word) > 0: #adds the word if its the last word of the user's answer or the question class instance's answer, doesn't add empty strings
                         splicedSentence[query.index(i)].append(word)
                         word = ""
                 #NOTE: Next, check for if the length of the words is matching, then check their individual letters, if not, then we squish them into one work and check letter by letter
-                print(splicedSentence)
+                #squish the words'
+                sentenceCombined = []
+                def concat(ss):
+                    tempSentence = ""
+                    for i in ss:
+                        tempSentence += i
+                    return tempSentence
+                        
+                for i in splicedSentence:
+                    sentenceCombined.append(concat(i))
+                
+                if sentenceCombined[0] == sentenceCombined[1]: #checks if both sentences are the exact same, if not, return it as a wrong
+                    globals()["playerScore"] += obj.points
+                    sts = "Correct"
+                    add = f"answer is {obj.answer}" 
+
+                else:
+                    sts = "Wrong"
+                    add = f"Correct answer is {obj.answer}" 
 
             elif type(query[0]) == type(query[1]) and type(query[0]) is float: #check if they're floats
                 a = query[0]
                 b = query[1]
-                if abs(a - b) < 0.1:
+                if abs(a - b) < 0.1 :
                     globals()["playerScore"] += obj.points
-                    locals()["status"] = "Correct"
+                    sts = "Correct"
+                    add = f"answer is {obj.answer}"
 
                 else:
-                    locals()["status"] = "Wrong"
+                    sts = "Wrong"
+                    add = f"Correct answer is {obj.answer}"
                 
             elif type(query[0]) != type(query[1]):
                 print("you tried to enter a %s into a question that required a %s" % (type(query[0]), type(query[1])))
 
 
-            
-            return result
+            print(f"sts: {sts}, {add}")
+            return (sts, add)
         
 
 
         
-        s, a = GODOFCHECKINGEYEOFRA()
+        (s, a)= GODOFCHECKINGEYEOFRA()
 
         result = f"Your answer is {s}, {a}"
-        correctAns = prompt(text=result)
-        correctAns.setPosition(400, 300)
+        correctAns = prompt(text=result, font_size=20)
+        correctAns.setPosition(350, 500)
         correctAns.draw()
         self.text = "" #clears the text inside the textbox
         pygame.display.update()
