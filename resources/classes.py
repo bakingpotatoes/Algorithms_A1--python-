@@ -4,6 +4,7 @@ import pygame, sys
 import os
 import asyncio
 import time
+import string
 
 pygame.init()
 currentscene = ["startscene"] #VERY IMPORTANT: first scene to be loaded
@@ -240,7 +241,7 @@ class button:
                     #NOTE: hopefully by the time we're done, we would have used a seperate text files dedicated for every element if it shows up again
                     #      if we do this, then everytime the game is ran again, then that button's function will be dependent on whatever that file tells it to do
                     #      if not, the prompt will keep showing up, until you select a resource file, if you wish to change the resource file, then you need to change it with a command in runtime
-                    notification = prompt(text="PRESS ANY KEY TO CONTINUE :)")
+                    notification = prompt(text="PRESS ANY KEY TO CONTINUE :) your time is still running")
                     notification.setPosition(400,30)
                     notification.draw()
                     ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
@@ -250,7 +251,7 @@ class button:
                     obj = ctypes.cast(questionIDs[Q_Num], ctypes.py_object).value
                     globals()["Q_Num"] += 1
                     if obj.answer == self.name:
-                        globals()["playerScore"] += 1
+                        globals()["playerScore"] += obj.points
 
                     # change the image of the A-D buttons to become the alt image, for "wrong"
                     for item in entities:
@@ -453,45 +454,139 @@ class timer(prompt): #i could use __init_subclass__ or something but nah
 class score(prompt):
     pass
 
+
 class textEdit(prompt):
     def __init__(self, text="", font="arial", font_size=15, autoExpandMode=1, boxSize_x=None, boxSize_y=None):
         super().__init__(text, font, font_size, autoExpandMode, boxSize_x, boxSize_y)
         self.text = text
 
     def checkAnswer(self):
-        #this section holds the algorithm
         globals()["dynamicText"] = ""
-        notification = prompt(text="PRESS ANY KEY TO CONTINUE :)")
+
+        notification = prompt(text="PRESS ANY KEY TO CONTINUE :) your time is still running")
         notification.setPosition(400,30)
         notification.draw()
-        ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
-        ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+
         obj = ctypes.cast(questionIDs[Q_Num], ctypes.py_object).value
 
         globals()["Q_Num"] += 1
-
-        query = [self.text, obj.answer]
-        print(query)
-        splicedSentence = [[],[]] #[self.text spliced],[obj.answer spliced]
-        word = ""
-        for i in query:
-            for char in i:
-                if char != " ":
-                    word += char
-                else:
-                    splicedSentence[query.index(i)].append(word)
-                    word = ""
-            splicedSentence[query.index(i)].append(word)
+        def GODOFCHECKINGEYEOFRA():
+            ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+            ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+            userAnswer = self.text #caching to leave the original data unaffected
+            questionAnswer = obj.answer #caching to leave the original data unaffected
+            letters = string.ascii_lowercase + " "
+            result = ["",""]
+            sts = result[0]
+            add = result[1]
             word = ""
-        
-            print(i)
+            query = [userAnswer, questionAnswer]
+            splicedSentence = [[],[]] #[userAnswer spliced],[questionAnswer spliced]
+
+            for i in query:
+                indexVal = query.index(i) #caching this because if you try to access the index of 'i' after changing 'i', it doesn't exist anymore :p
+                assign = ""
+
+                for letter in i:
+                    if letter.lower() in letters:
+                        assign = "str"
+                        break
+                if assign == "str" or len(i) == 0: #if there's nothing in the input, the For loop just doesn't execute
+                    query[indexVal] = str(i)
+                else:
+                    #trying my best to not nest so deep as it becomes unreadable
+                    if "-" in i and "." in i: #checks if your float formatting for "-" and "." is incorrect
+
+                        if (i.index("-") > i.index(".")):
+                            #kill
+                            globals()["add"] = "blah blah blah"
+                            globals()["sts"] = "Wrong"
+
+                        elif i.index("-") > 0:
+                            globals()["add"] = "blah blah blah"
+                            globals()["sts"] = "Wrong"
+
+                        elif i.count(".") > 1:
+                            globals()["add"] = "blah blah blah"
+                            globals()["sts"] = "Wrong"
+
+                        elif i.count("-") > 1:
+                            globals()["add"] = "blah blah blah"
+                            globals()["sts"] = "Wrong"
+
+                        else:
+                            query[indexVal] = float(i)
+                    elif "-" in i:
+                        if i.index("-") > 0:
+                            #kill
+                            globals()["add"] = "negative in the wrong place"
+                            globals()["sts"] = "Wrong"
+
+                        elif i.count("-") > 0:
+                            globals()["add"] = "too many negatives"
+                            globals()["sts"] = "Wrong"
+
+                        else:
+                            query[indexVal] = float(i)
+
+                    elif "." in i:
+                        if i.count(".") > 1:
+                            #kill
+                            globals()["add"] = "too many decimals"
+                            globals()["sts"] = "Wrong"
+                        else:
+                            query[indexVal] = float(i)
+
+                    else:
+                        #treat as normal float
+                        query[indexVal] = float(i)
+
+
+                print(i, type(query[indexVal]))
+
+
+            #check if both answers are the same type
+            if type(query[0]) == type(query[1]) and type(query[0]) is str: #check if they're strings
+                for i in query:
+                    for char in i:
+                        if char != " " or char != "-":
+                            word += char #adds the word if there is a space
+                        elif len(word) > 0 and char == " ": #adds the word if there is a space, doesn't add empty strings
+                            splicedSentence[query.index(i)].append(word)
+                            word = ""
+                    if len(word) > 0: #adds the word if its the last word of the user's answer or the question class instance's answer, doesn't add empty strings
+                        splicedSentence[query.index(i)].append(word)
+                        word = ""
+                #NOTE: Next, check for if the length of the words is matching, then check their individual letters, if not, then we squish them into one work and check letter by letter
+                print(splicedSentence)
+
+            elif type(query[0]) == type(query[1]) and type(query[0]) is float: #check if they're floats
+                a = query[0]
+                b = query[1]
+                if abs(a - b) < 0.1:
+                    globals()["playerScore"] += obj.points
+                    locals()["status"] = "Correct"
+
+                else:
+                    locals()["status"] = "Wrong"
+                
+            elif type(query[0]) != type(query[1]):
+                print("you tried to enter a %s into a question that required a %s" % (type(query[0]), type(query[1])))
+
+
+            
+            return result
         
 
-        #insert word match percentage algorithm here
 
-        self.text = ""
-        for i in splicedSentence:
-            i.clear()
+        
+        s, a = GODOFCHECKINGEYEOFRA()
+
+        result = f"Your answer is {s}, {a}"
+        correctAns = prompt(text=result)
+        correctAns.setPosition(400, 300)
+        correctAns.draw()
+        self.text = "" #clears the text inside the textbox
         pygame.display.update()
         asyncio.run(waiterFunc("anyKeyPressedEvent"))
 

@@ -7,7 +7,7 @@ from resources.classes import timer as timer_obj #local
 from resources.classes import score as score_obj #local
 from resources.classes import clampf as clampf #local
 from resources.classes import textEdit as textEdit_obj #local
-import os, sys
+import sys
 import time
 pygame.init()
 
@@ -215,7 +215,12 @@ def check_mouse():
 #-- setting the opening scene -- 
 
 QUESTIONS = [
-    question_obj("Testbed Question for written Test", Qtype=1, font_size=20, answer="A"),
+    question_obj("Testbed Question for written Test 1", Qtype=1, font_size=20, answer="-.1", points=5),
+    question_obj("Testbed Question for written Test 2   ", Qtype=1, font_size=20, answer="A", points=4),
+    question_obj("Testbed Question for written Test 1", Qtype=1, font_size=20, answer="A", points=3),
+    question_obj("Testbed Question for written Test 2   ", Qtype=1, font_size=20, answer="A"),
+    question_obj("Testbed Question for written Test 1", Qtype=1, font_size=20, answer="A"),
+    question_obj("Testbed Question for written Test 2   ", Qtype=1, font_size=20, answer="A"),
     question_obj("1) Which one is a name of a snake?", answer="A", points=1, font_size=20),
     question_obj("2) What is the fourth option in this question?", answer="A", points=1, font_size=20),
     question_obj("3) Evaluate the python expression: int(22/5)+23/4.", answer="C", points=1, font_size=20),
@@ -333,7 +338,7 @@ while running:
                 elif pygame.key.name(event.key) == "backspace":
                     reference.dynamicText = reference.dynamicText[:-1] #selects all characters in a string except for the last one
 
-                elif pygame.key.name(event.key) == "return":
+                elif pygame.key.name(event.key) == "return": #return is just the enter key
                     textInput.checkAnswer()
 
             else:
