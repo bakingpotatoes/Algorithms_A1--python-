@@ -221,7 +221,10 @@ def check_mouse():
 
 #-- setting the opening scene -- 
 
-QUESTIONS = [
+QUESTIONS = [ 
+    #------------------------
+    #SET THE QUESTIONS HERE
+    #------------------------
     question_obj("1) What are the first 3 digits of PI?", Qtype=1, font_size=20, answer="3.14", points=5),
     question_obj("2) What is the first name of the current monarch of England?", Qtype=1, font_size=20, answer="Charles", points=5),
     question_obj("3) Anyways back to real questions, what does SHA stand for?", Qtype=1, font_size=20, answer="Secure Hash Algorithm", points=5),

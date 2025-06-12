@@ -503,7 +503,7 @@ class textEdit(prompt):
             ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
             userAnswer = self.text #caching to leave the original data unaffected
             questionAnswer = obj.answer #caching to leave the original data unaffected
-            letters = string.ascii_lowercase + " "
+            letters = string.ascii_lowercase + string.ascii_uppercase + " "
             sts = ""
             add = ""
             addAns = ""
@@ -632,34 +632,37 @@ class textEdit(prompt):
             #check if both answers are the same type
             if type(query[0]) == type(query[1]) and type(query[0]) is str: #check if they're strings
                 word = "" #need to store this here because it is accumulative (wish there was another way instead of clogging outside the code)
-                for i in query:
-                    for char in i:
-                        # print(f"char: '{char}'")
-
-                        if char not in (" ", "-"):
+                currIndex = 0
+                print(f"Query: {query}")
+                for i, v in enumerate(query):
+                    print(f"current index: {i}")
+                    currIndex = i
+                    for char in query[currIndex]:
+                        if char not in [" ", "-"]:
                             # print(char != " ")
                             word += char.lower() #adds the word if there is a space
-                        elif len(word) > 0 and char in (" ", "-"): #adds the word if there is a space, doesn't add empty strings
+                        elif len(word) > 0 and char in [" ", "-"]: #adds the word if there is a space, doesn't add empty strings
                             # print("pass")
-                            splicedSentence[query.index(i)].append(word)
+                            splicedSentence[currIndex].append(word)
                             word = ""
 
                         # print(f"word count: '{len(word)}'")
                     if len(word) > 0: #adds the word if its the last word of the user's answer or the question class instance's answer, doesn't add empty strings
-                        splicedSentence[query.index(i)].append(word)
+                        splicedSentence[currIndex].append(word)
                         word = ""
                 #NOTE: Next, check for if the length of the words is matching, then check their individual letters, if not, then we squish them into one work and check letter by letter
                 #squish the words'
                 sentenceCombined = []
                 def concat(ss):
                     tempSentence = ""
-                    for i in ss:
-                        tempSentence += i
-                    return tempSentence
+                    for a in ss:
+                        tempSentence += a
+                    return tempSentence.lower()
                         
                 for i in splicedSentence:
                     sentenceCombined.append(concat(i))
-                
+                print(f"splicedSentence: {splicedSentence}")
+                print(f"Compare OBJ1: {sentenceCombined[0]}, Compare OBJ2: {sentenceCombined[1]}")
                 if sentenceCombined[0] == sentenceCombined[1]: #checks if both sentences are the exact same, if not, return it as a wrong
                     globals()["playerScore"] += obj.points
                     sts = "Correct"
