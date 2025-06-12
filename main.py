@@ -83,7 +83,7 @@ A = button_obj(name="A", image="debug_button.png")
 B = button_obj(name="B", image="debug_button.png")
 C = button_obj(name="C", image="debug_button.png")
 D = button_obj(name="D", image="debug_button.png")
-textInput = textEdit_obj(autoExpandMode=0, boxSize_x=600, boxSize_y=300, font_size=20)
+textInput = textEdit_obj(autoExpandMode=0, boxSize_x=600, boxSize_y=300, font_size=40)
 textInputGuidance1 = prompt_obj(text="For string questions, write the exact string, spaces and hyphens don't matter", autoExpandMode=0, boxSize_x=600, boxSize_y=50, font_size=20)
 textInputGuidance2 = prompt_obj(text="For number questions, don't include spaces, negatives before decimals, -.005 is -0.005, don't be silly", autoExpandMode=0, boxSize_x=600, boxSize_y=50, font_size=16)
 
@@ -222,21 +222,23 @@ def check_mouse():
 #-- setting the opening scene -- 
 
 QUESTIONS = [
-    question_obj("Testbed Question for written Test 2   ", Qtype=1, font_size=20, answer="A", points=4),
-    question_obj("Testbed Question for written Test 1", Qtype=1, font_size=20, answer="A", points=3),
-    question_obj("Testbed Question for written Test 2   ", Qtype=1, font_size=20, answer="A"),
-    question_obj("Testbed Question for written Test 1", Qtype=1, font_size=20, answer="A"),
-    question_obj("Testbed Question for written Test 2   ", Qtype=1, font_size=20, answer="A"),
-    question_obj("1) Which one is a name of a snake?", answer="A", points=1, font_size=20),
-    question_obj("2) What is the fourth option in this question?", answer="A", points=1, font_size=20),
-    question_obj("3) Evaluate the python expression: int(22/5)+23/4.", answer="C", points=1, font_size=20),
-    question_obj("4) How many hours do FIC students study a day?", answer="D", points=1, font_size=20),
-    question_obj("5) I have keys but no locks. I have space but no room. You can enter data, but you can't go inside, what am I? ", answer="B", points=1, font_size=15),
-    question_obj("6) Which fruit is classified as a berry?", answer="A", points=1, font_size=20),
-    question_obj("7) I'm a 5-letter word starting with A and ending with O. No other word my length holds more vowels than me—who am I?", answer="A", points=1, font_size=12),
-    question_obj("8) What was the answer to the first question in this quiz?", answer="C", points=1, font_size=20),
-    question_obj("9) Which mathematical expression below equals 2?", answer="D", points=1, font_size=20),
-    question_obj("10) Where is Taylor University located?", answer="B", points=1, font_size=20)
+    question_obj("1) What are the first 3 digits of PI?", Qtype=1, font_size=20, answer="3.14", points=5),
+    question_obj("2) What is the first name of the current monarch of England?", Qtype=1, font_size=20, answer="Charles", points=5),
+    question_obj("3) Anyways back to real questions, what does SHA stand for?", Qtype=1, font_size=20, answer="Secure Hash Algorithm", points=5),
+    question_obj("4) Is java and javaScript the same thing?", Qtype=1, font_size=20, answer="No", points=5),
+    question_obj("5) My name has glass and tree in it, what frog am I?", Qtype=1, font_size=20, answer="Glass Tree Frog", points=5),
+    question_obj("6) Quick Maths, 10+9+8+7+6+5+4+3+2+1 equals to?", Qtype=1, font_size=20, answer="55", points=5),
+    question_obj("7) Let's try 55 in words, shall we?", Qtype=1, font_size=20, answer="Fifty-Five", points=5),
+    question_obj("8) Which one is a name of a snake?", answer="A", font_size=20, points=1),
+    question_obj("9) What is the fourth option in this question?", answer="A", points=1, font_size=20),
+    question_obj("10) Evaluate the python expression: int(22/5)+23/4.", answer="C", points=1, font_size=20),
+    question_obj("11) How many hours do FIC students study a day?", answer="D", points=1, font_size=20),
+    question_obj("12) I have keys but no locks. I have space but no room. You can enter data, but you can't go inside, what am I? ", answer="B", points=1, font_size=15),
+    question_obj("13) Which fruit is classified as a berry?", answer="A", points=1, font_size=20),
+    question_obj("14) I'm a 5-letter word starting with A and ending with O. No other word my length holds more vowels than me—who am I?", answer="A", points=1, font_size=12),
+    question_obj("15) What was the answer to the first question in this quiz?", answer="C", points=1, font_size=20),
+    question_obj("16) Which mathematical expression below equals 2?", answer="D", points=1, font_size=20),
+    question_obj("17) Where is Taylor University located?", answer="B", points=1, font_size=20)
 ]
 
 sum = 0

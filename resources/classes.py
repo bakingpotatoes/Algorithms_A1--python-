@@ -234,6 +234,7 @@ class button:
                     self.toggled_state *= -1
                     self.draw(self.getPosition(), self.scale * 0.8)
                 else:
+                    addedScore = 0
                     #if you have a button in the scene that is funcType = 1, during runtime, you will be prompted with a screen
                     #that will ask you what elements you want to add, change, remove, etc
                     #the reason why we do this is because we want to test text display, text input/output and checks during runtime
@@ -252,6 +253,7 @@ class button:
                     globals()["Q_Num"] += 1
                     if obj.answer == self.name:
                         globals()["playerScore"] += obj.points
+                        addedScore = obj.points
 
                     # change the image of the A-D buttons to become the alt image, for "wrong"
                     for item in entities:
@@ -268,6 +270,13 @@ class button:
                                 ctypes.cast(item["ID"], ctypes.py_object).value.draw(ctypes.cast(item["ID"], ctypes.py_object).value.getPosition(), ctypes.cast(item["ID"], ctypes.py_object).value.scale)
                     
 
+
+                    ctypes.cast(scoreID, ctypes.py_object).value.text = f"Your Score: Added {addedScore}"
+                    if addedScore > 0:
+                        ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[51,255,51])
+                    else:
+                        ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+                    ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
                     pygame.display.update()
                     asyncio.run(waiterFunc("anyKeyPressedEvent"))
                         
@@ -471,13 +480,15 @@ class textEdit(prompt):
 
         globals()["Q_Num"] += 1
         def GODOFCHECKINGEYEOFRA():
-            ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+            ctypes.cast(scoreID, ctypes.py_object).value.text = f"Your Current Score: Added {obj.points}"
             ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+            ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
             userAnswer = self.text #caching to leave the original data unaffected
             questionAnswer = obj.answer #caching to leave the original data unaffected
             letters = string.ascii_lowercase + " "
             sts = ""
             add = ""
+            achievedScore = 0
             query = [userAnswer, questionAnswer]
             splicedSentence = [[],[]] #[userAnswer spliced],[questionAnswer spliced]
 
@@ -578,6 +589,7 @@ class textEdit(prompt):
                     globals()["playerScore"] += obj.points
                     sts = "Correct"
                     add = f"answer is {obj.answer}" 
+                    achievedScore = obj.points
 
                 else:
                     sts = "Wrong"
@@ -590,6 +602,7 @@ class textEdit(prompt):
                     globals()["playerScore"] += obj.points
                     sts = "Correct"
                     add = f"answer is {obj.answer}"
+                    achievedScore = obj.points
 
                 else:
                     sts = "Wrong"
@@ -598,15 +611,18 @@ class textEdit(prompt):
             elif type(query[0]) != type(query[1]):
                 print("you tried to enter a %s into a question that required a %s" % (type(query[0]), type(query[1])))
 
-
-            print(f"sts: {sts}, {add}")
-            return (sts, add)
+            return (sts, add, achievedScore)
         
 
 
         
-        (s, a)= GODOFCHECKINGEYEOFRA()
-
+        (s, a, addedScore)= GODOFCHECKINGEYEOFRA()
+        ctypes.cast(scoreID, ctypes.py_object).value.text = f"Your Score: Added {addedScore}"
+        if addedScore > 0:
+            ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[51,255,51])
+        else:
+            ctypes.cast(scoreID, ctypes.py_object).value.draw(textcolor=[255,0,0])
+        ctypes.cast(timerID, ctypes.py_object).value.draw(textcolor=[255,0,0])
         result = f"Your answer is {s}, {a}"
         correctAns = prompt(text=result, font_size=20)
         correctAns.setPosition(350, 500)
