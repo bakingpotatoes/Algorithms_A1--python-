@@ -121,7 +121,7 @@ class button:
             self.y = None
             
     def draw(self, pos = None, scale = None):
-        #^^^ Basically, we call this function in the class shelf to ONLY draw shit
+        #^^^ Basically, we call this function in the class shelf to ONLY draw stuff
         #    we dont expect and will never expect it to return anything, unless its code to be ran in main.py for __main__ == __name__
         if isinstance(scale, (int, float)):
             self.scale = scale
@@ -131,7 +131,7 @@ class button:
         #    If it is set, we set it to the desired value, but if not, then we just assume that we're trying to get the set value
         
 
-        surface = pygame.display.get_surface().get_size() #gets the currently active viewport's viewport layer's size, im not explaining wtf a root, canvas, blah blah layer is
+        surface = pygame.display.get_surface().get_size() #gets the currently active viewport's viewport layer's size
         width, height = surface[0], surface[1] #assigns the width and height respectively to the returned tuple of get_size()
         imgRes = self.image[self.toggled_state].get_size() #gets the (width, height) dimensions of the object's image
         happyGoLucky = False #gives the green flag for fool proof method
@@ -725,7 +725,7 @@ class textEdit(prompt):
             elif type(query[0]) != type(query[1]):
                 #kill
                 sts = "Wrong"
-                add = f"Your answer is {type(query[0])}, but the actual answer is {type(query[1])}" 
+                add = f"Your answer is {type(query[1])}, but the actual answer is {type(query[0])}" 
 
             return (sts, add, addAns, achievedScore)
         
