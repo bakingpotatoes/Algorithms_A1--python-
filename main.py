@@ -133,7 +133,6 @@ def questionscene():
             i.draw(i.getPosition(), scale=0.025)
             i.labels = QUESTIONS[reference.Q_Num].label
             i.initialiseLabels(xOffset=300)
-            # print(f"{i.name} label: {i.targetLabel}")
 
         QUESTIONS[reference.Q_Num].draw()
 
@@ -180,7 +179,7 @@ def endscene(): #we can use this scene as the results screen
 
     reset.setPosition(x=400, y=300)
     reset.draw(reset.getPosition(), scale=0.5)
-    score = score_obj(f"Your Final Score: {round(percentage, 1)}% {remark}", font_size=30)
+    score = score_obj(f"Your Final Score: {round(percentage, 2)}% {remark}", font_size=30)
     score.setPosition(x=400,y=50)
     score.draw()
     lightswitch.draw(lightswitch.getPosition(), scale=0.1)
@@ -191,11 +190,9 @@ def check_mouse():
     #checks through all instances
     #matches mouse position to see if its in the bounding box (only ever can be a box btw)'s bounds
     mouse_pos = pygame.mouse.get_pos()
-    # print(reference.entities)
     
     for enti in reference.entities:
         ent = globals()[enti["NAME"]] #turns the string into a variable from the global variables
-        # print("h_box params: ", ent.h_boundingbox, "v_box params: ", ent.v_boundingbox)
         #CHECK THE MOUSE HOVER FUNCTION
         if mouse_pos[0] > ent.h_boundingbox[0] and mouse_pos[0] < ent.h_boundingbox[1] and mouse_pos [1] > ent.v_boundingbox[0] and mouse_pos[1] < ent.v_boundingbox[1]:
             #here we are hovering in this frame, next frame, only check FIRST if we're hovering or not then update the cursor,
@@ -217,25 +214,18 @@ QUESTIONS = [
     #SET THE QUESTIONS HERE
     #------------------------
 
-    #SUBJECTIVES
     question_obj("1) What are the first 3 digits of PI?", Qtype=1, font_size=20, answer="3.14", points=5),
-    question_obj("2) What is the first name of the current monarch of England?", Qtype=1, font_size=20, answer="Charles", points=5),
-    question_obj("3) Anyways back to real questions, what does SHA stand for?", Qtype=1, font_size=20, answer="Secure Hash Algorithm", points=5),
-    question_obj("4) Is java and javaScript the same thing?", Qtype=1, font_size=20, answer="No", points=5),
-    question_obj("5) My name has glass and tree in it, what frog am I?", Qtype=1, font_size=20, answer="Glass Tree Frog", points=5),
-    question_obj("6) Quick Maths, 10+9+8+7+6+5+4+3+2+1 equals to?", Qtype=1, font_size=20, answer="55", points=5),
-    question_obj("7) Let's try 55 in words, shall we?", Qtype=1, font_size=20, answer="Fifty-Five", points=5),
-    #MCQ
-    question_obj("8) Which one is a name of a snake?", answer="A", font_size=20, points=1, labels=["Python", "CSS", "Javascript", "HTML"]),
-    question_obj("9) What is the fourth option in this question?", answer="A", points=1, font_size=20, labels=["D", "Maybe D", "Must be D", "Not D"]),
-    question_obj("10) Evaluate the python expression: int(22/5)+23/4.", answer="C", points=1, font_size=20, labels=["10", "10.75", "9.75", "9"]),
-    question_obj("11) How many hours do FIC students study a day?", answer="D", points=1, font_size=20, labels=["6", "12", "24",  "I don't know"]),
-    question_obj("12) I have keys but no locks. I have space but no room. You can enter data, but you can't go inside, what am I? ", answer="B", points=1, font_size=15, labels=["Website", "Keyboard", "Monitor", "Spacebar"]),
-    question_obj("13) Which fruit is classified as a berry?", answer="A", points=1, font_size=20, labels=["Banana", "Strawberry", "Apple", "Peach"]),
-    question_obj("14) I'm a 5-letter word starting with A and ending with O. No other word my length holds more vowels than me—who am I?", answer="A", points=1, font_size=12, labels=["Audio", "A 6-letter word", "Umbrella", "Vowel"]),
-    question_obj("15) What was the answer to the first question in this quiz?", answer="C", points=1, font_size=20, labels=["I don't know", "A 6-letter word", "Python", "D"]),
-    question_obj("16) Which mathematical expression below equals 2?", answer="D", points=1, font_size=20, labels=["2 + 2 - 6", "1 + 1 * 0", "2 / 2 + 2", "2 * 4 - 6"]),
-    question_obj("17) Where is Taylor University located?", answer="B", points=1, font_size=20, labels=["Malaysia", "USA", "India", "China"])
+    question_obj("2) Which one is a name of a snake?", answer="A", font_size=20, points=1, labels=["Python", "CSS", "Javascript", "HTML"]),
+    question_obj("3) Evaluate the python expression: int(22/5)+23/4.", answer="C", points=1, font_size=20, labels=["10", "10.75", "9.75", "9"]),
+    question_obj("4) What is the first name of the current monarch of England?", Qtype=1, font_size=20, answer="Charles", points=5),
+    question_obj("5) Anyways back to real questions, what does SHA stand for?", Qtype=1, font_size=20, answer="Secure Hash Algorithm", points=5),
+    question_obj("6) Which fruit is classified as a berry?", answer="A", points=1, font_size=20, labels=["Banana", "Strawberry", "Apple", "Peach"]),
+    question_obj("7) What is the fourth option in this question?", answer="A", points=1, font_size=20, labels=["D", "Maybe D", "Must be D", "Not D"]),
+    question_obj("8) My name has glass and tree in it, what frog am I?", Qtype=1, font_size=20, answer="Glass Tree Frog", points=5),
+    question_obj("9) Quick Maths, 10+9+8+7+6+5+4+3+2+1 equals to?", Qtype=1, font_size=20, answer="55", points=5),
+    question_obj("10) Let's try 55 in words, shall we?", Qtype=1, font_size=20, answer="Fifty-Five", points=5),
+    question_obj("11) I have keys but no locks. I have space but no room. You can enter data, but you can't go inside, what am I? ", answer="B", points=1, font_size=15, labels=["Website", "Keyboard", "Monitor", "Spacebar"]),
+    question_obj("12) I'm a 5-letter word starting with A and ending with O. No other word my length holds more vowels than me—who am I?", answer="A", points=1, font_size=12, labels=["Audio", "A 6-letter word", "Umbrella", "Vowel"])
 ]
 
 sum = 0
@@ -298,27 +288,22 @@ while running:
                 case 1:
                     #left mouse button down
                     MOUSE["LEFTBUTTON"] = True
-                    print("Input detected: Left Mouse Button")
                     pass
                 case 2:
                     #scroll wheel button down
                     MOUSE["MIDDLEMOUSE_BUTTON"] = True
-                    print("Input detected: scroll wheel button down")
                     pass
                 case 3:
                     #right mouse button down
                     MOUSE["RIGHTBUTTON"] = True
-                    print("Input detected: Right Mouse Button")
                     pass
                 case 4:
                     #scroll wheel up
                     MOUSE["SCROLLUP"] = True
-                    print("Input detected: Scrolling up")
                     pass
                 case 5:
                     #scroll wheel down
                     MOUSE["SCROLLDOWN"] = True
-                    print("Input detected: Scrolling down")
                     pass
             pass
         
@@ -351,8 +336,6 @@ while running:
 
 
         if event.type == pygame.QUIT:
-            #print("Closing window \nQuitting Pygame")
-
             #pygame is the base module, in it, contains enumerator constants that cannot be changed but can be accessed and calledback by the pygame.event module's .get() function
             #the pygame.QUIT eventtype is binded to a specific value that if it matches with the .get(eventtype=pygame."eventname"), will return a true in "if event == pygame.QUIT"
             #the .get() function returns the eventtype from the queue (a queue is the pygame engine's way of listening for mouseclicks, keystrokes, movements, etc)

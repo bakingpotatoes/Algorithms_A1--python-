@@ -1,9 +1,7 @@
 import ctypes
-from enum import Enum
 import pygame, sys
 import os
 import asyncio
-import time
 import string
 
 pygame.init()
@@ -279,7 +277,10 @@ class button:
                         addedScore = obj.points
 
                     # change the image of the A-D buttons to become the alt image, for "wrong"
-                    for item in entities:
+                    for item in entities: 
+                        
+                        #NOTE: program will appear to slow down here becauses it pauses a bit to take things out of memory, which is occuring at least 3 times with each button, hence a total of 12 (CTYPES)
+
                         if item["NAME"] in ["A", "B", "C", "D"]:
                             cacheimage = ctypes.cast(item["ID"], ctypes.py_object).value.imageName
                             if item["NAME"] != obj.answer: #if wrong...
@@ -566,8 +567,6 @@ class textEdit(prompt):
                     #trying my best to not nest so deep as it becomes unreadable
                     if indexVal == 1:
                         if "-" in i and "." in i: #checks if your float formatting for "-" and "." is incorrect
-                            print("test", i)
-
                             if (i.index("-") > i.index(".")):
                                 #kill
                                 add = "(bad float) negatives cannot be behind decimals"
@@ -666,27 +665,19 @@ class textEdit(prompt):
                             query[indexVal] = float(i)
 
 
-                print(i, type(query[indexVal]))
-
-
             #check if both answers are the same type
             if type(query[0]) == type(query[1]) and type(query[0]) is str: #check if they're strings
                 word = "" #need to store this here because it is accumulative (wish there was another way instead of clogging outside the code)
                 currIndex = 0
-                print(f"Query: {query}")
                 for i, v in enumerate(query):
-                    print(f"current index: {i}")
                     currIndex = i
                     for char in query[currIndex]:
                         if char not in [" ", "-"]:
-                            # print(char != " ")
                             word += char.lower() #adds the word if there is a space
                         elif len(word) > 0 and char in [" ", "-"]: #adds the word if there is a space, doesn't add empty strings
-                            # print("pass")
                             splicedSentence[currIndex].append(word)
                             word = ""
 
-                        # print(f"word count: '{len(word)}'")
                     if len(word) > 0: #adds the word if its the last word of the user's answer or the question class instance's answer, doesn't add empty strings
                         splicedSentence[currIndex].append(word)
                         word = ""
@@ -701,8 +692,11 @@ class textEdit(prompt):
                         
                 for i in splicedSentence:
                     sentenceCombined.append(concat(i))
-                print(f"splicedSentence: {splicedSentence}")
-                print(f"Compare OBJ1: {sentenceCombined[0]}, Compare OBJ2: {sentenceCombined[1]}")
+
+                #these print statements are were only for debugging purposes
+                # print(f"splicedSentence: {splicedSentence}")
+                # print(f"Compare OBJ1: {sentenceCombined[0]}, Compare OBJ2: {sentenceCombined[1]}")
+
                 if sentenceCombined[0] == sentenceCombined[1]: #checks if both sentences are the exact same, if not, return it as a wrong
                     globals()["playerScore"] += obj.points
                     sts = "Correct"
@@ -761,7 +755,7 @@ class textEdit(prompt):
         asyncio.run(waiterFunc("anyKeyPressedEvent"))
 
     def checkLength(self):
-        if len(dynamicText) <= 20:
+        if len(dynamicText) <= 28:
             return True
         elif len(dynamicText) < 0:
             return True
@@ -789,7 +783,6 @@ def clampf(val, min=None, max=None): #the purpose of this function is to check i
 async def anyKeyPressedEvent(event): #if any key is pressed, "event" will .set()
     a = True
     while a:
-        # print("PLEASE PRESS ANY KEY TO CONTINUE")
         for e in pygame.event.get():
             if e.type == pygame.KEYDOWN:
                 a = False
