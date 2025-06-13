@@ -40,6 +40,16 @@ class button:
         self.buttonType = buttonType #tells the game whether or not this button is a toggle-button or a normal-button
         self.h_boundingbox = [0,0] #important for cursor detection over a button (horizontal component)
         self.v_boundingbox = [0,0] #important for cursor detection over a button (vertical component)
+        self.labels = None
+        self.targetLabel = None
+
+
+        #------returns a referalindex based on what name the button is, assuming its an MCQ and the name is a single character string---------
+        if self.name and len(self.name) == 1: #returns a truthy
+            self.referalIndex = string.ascii_lowercase.index(self.name.lower())
+        else:
+            self.referalIndex = None
+        #-------------------------------------------------------------------------------------------------------------------------------------
 
 
         if image != None: 
@@ -70,6 +80,20 @@ class button:
         self.toggled_state = -1 #toggled_states:
                            # -1 = toggled off
                            #  1 = toggled on
+
+
+    def initialiseLabels(self, xOffset=0, yOffset=0):
+        if self.labels is not None and self.referalIndex < len(self.labels): #rarely called unless the question expects fewer buttons than there are in the scene and 
+            if self.targetLabel is None:
+                self.targetLabel = self.labels[self.referalIndex] #returns a string of the label
+                offsetX = self.getPosition()[0] + xOffset
+                offsetY = self.getPosition()[1] + yOffset
+                self.labelPrompt = prompt(autoExpandMode=0, boxSize_x=0, boxSize_y=0, font_size=30)
+                self.labelPrompt.setPosition(offsetX, offsetY)
+                print(f"{self.name}: {offsetX}, {offsetY}")
+            else:
+                self.labelPrompt.text = self.targetLabel
+                self.labelPrompt.draw(textcolor=[0,0,0])
 
     def setPosition(self, x = None, y = None):
         #Everytime before you draw an button onto the screen, you need to set its position
@@ -133,7 +157,7 @@ class button:
             if self.image[self.toggled_state] != None: #checks if the object's image (normal state) is valid, if not, should also crash tbh
                 new_image = pygame.transform.scale(self.image[self.toggled_state], [imgRes[0] * self.scale, imgRes[1] * self.scale]) #scales the image to desired scale, if non, it just won't
                 
-                #mathematics CS majors couldn't be fucked to understand !!!
+                #mathematics
                 new_pos = [0,0]
                 new_pos[0] = pos[0] - (imgRes[0] * self.scale) / 2 #this part just translates the image to the centre before it places it on the screen 
                 new_pos[1] = pos[1] - (imgRes[1] * self.scale) / 2
@@ -147,7 +171,6 @@ class button:
                 #upper
                 self.v_boundingbox[1] = pos[1] + (imgRes[1] * self.scale) / 2
                 #lower
-                #mathematics CS majors couldn't be fucked to understand !!!
 
                 if self.name == "lightswitch": #this just checks if this button is a funny lightswitch, idk why, its my script 
                     if self.toggled_state == 1:
@@ -262,12 +285,13 @@ class button:
                             if item["NAME"] != obj.answer: #if wrong...
                                 #we will now cache the current image name
                                 #then we will proceed to reinitialise the button with the new image name
-                                ctypes.cast(item["ID"], ctypes.py_object).value.__init__(name=item["NAME"], image="lightswitchoff.png")
-                                ctypes.cast(item["ID"], ctypes.py_object).value.draw(ctypes.cast(item["ID"], ctypes.py_object).value.getPosition(), ctypes.cast(item["ID"], ctypes.py_object).value.scale)
+                                ctypes.cast(item["ID"], ctypes.py_object).value.__init__(name=item["NAME"], image="Wrong.png")
+                                ctypes.cast(item["ID"], ctypes.py_object).value.draw(ctypes.cast(item["ID"], ctypes.py_object).value.getPosition(), 0.055)
                                 ctypes.cast(item["ID"], ctypes.py_object).value.__init__(name=item["NAME"], image=cacheimage)
                             else:
+                                ctypes.cast(item["ID"], ctypes.py_object).value.__init__(name=item["NAME"], image="Correct.png")
+                                ctypes.cast(item["ID"], ctypes.py_object).value.draw(ctypes.cast(item["ID"], ctypes.py_object).value.getPosition(), 0.055)
                                 ctypes.cast(item["ID"], ctypes.py_object).value.__init__(name=item["NAME"], image=cacheimage)
-                                ctypes.cast(item["ID"], ctypes.py_object).value.draw(ctypes.cast(item["ID"], ctypes.py_object).value.getPosition(), ctypes.cast(item["ID"], ctypes.py_object).value.scale)
                     
 
 
@@ -383,7 +407,7 @@ class prompt():
 class question(prompt): 
     #A subclass of "prompt" class, we can call methods and innerclasses and attributes from its superclass
     #Now the reason why we are subclassing it now is cuz its feasible, the superclass is 
-    def __init__(self, text="", font="arial", font_size=15, answer=None, points=0, Qtype=0, autoExpandMode=1, boxSize_x=None, boxSize_y=None):
+    def __init__(self, text="", font="arial", font_size=15, answer=None, points=0, Qtype=0, autoExpandMode=1, boxSize_x=None, boxSize_y=None, numberOfButtons=4, labels=[]):
         #turns out that subclass __init__() constructors are actually their own thing, unrelated to the super().__init__()
         super().__init__(text, font, font_size, autoExpandMode, boxSize_x, boxSize_y)
         #even the __class__.__name__ is the "cls", which will be known as the subclass
@@ -395,11 +419,24 @@ class question(prompt):
         self.type = Qtype #0 means its an MCQ question, 1 means its a written one
         self.answer = answer
         self.points = points
+        self.label = []
+        #---Label initialisation---
+        if isinstance(labels, list):
+            for index in range(clampf(numberOfButtons, 0, len(string.ascii_lowercase))):
+                if index < len(labels):
+                    self.label.append(labels[index])
+                else:
+                    self.label.append(f"null label {index}")
+
+        else:
+            self.label = []
+        #--------------------------
         errorDict = {
             "answer" : "Null answer(s)",
             "points" : "Null points",
             "tempText" : "Null placeholder or official text for this question",
             "type" : "type of question is neither MCQ or Subjective (Null)",
+            "label" : "no label items detected or null"
         }
         for attr in iter(self.__class__.__dict__["__static_attributes__"]):
             ###due to the high volume of questions, we need to check if the question might break the program, 
@@ -446,7 +483,10 @@ class question(prompt):
                             print("Error: No valid question type, but its not null")
                             crash() # type: ignore
                         else:
-                            continue                            
+                            continue  
+                    
+                    case "label":
+                        pass       
             else:
                 print("Error: Question says %s " % [errorDict[attr]])
                 crash() # type: ignore
