@@ -5,4 +5,4 @@
 5. Open your cmd in VSC
 6. Type "pip install -r requirements.txt" (dont worry its just pygame)
 7. The "import" section should become NOT white
-8. You're free to run it
+8. Make sure you're on the main.py and select it as the file to debug (with whatever method of running the file you prefer, F5 or the play button)
